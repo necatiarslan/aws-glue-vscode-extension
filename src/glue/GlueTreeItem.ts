@@ -7,7 +7,8 @@ export enum TreeItemType {
 	RunGroup = "RunGroup",
 	LogGroup = "LogGroup",
 	LogStream = "LogStream",
-	Run = "Run"
+	Run = "Run",
+	Detail = "Detail"
 }
 
 export class GlueTreeItem extends vscode.TreeItem {
@@ -19,7 +20,8 @@ export class GlueTreeItem extends vscode.TreeItem {
 		public ResourceName: string,
 		public readonly collapsibleState: vscode.TreeItemCollapsibleState,
 		public readonly command?: vscode.Command,
-		public Parent?: GlueTreeItem
+		public Parent?: GlueTreeItem,
+		public Payload?: any
 	) {
 		super(label, collapsibleState);
 		this.contextValue = TreeItemType;
@@ -48,6 +50,9 @@ export class GlueTreeItem extends vscode.TreeItem {
 				break;
 			case TreeItemType.Run:
 				iconName = "play";
+				break;
+			case TreeItemType.Detail:
+				iconName = "info";
 				break;
 		}
 

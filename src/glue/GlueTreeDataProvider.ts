@@ -11,8 +11,8 @@ export class GlueTreeDataProvider implements vscode.TreeDataProvider<GlueTreeIte
 
 	constructor() { }
 
-	Refresh(): void {
-		this._onDidChangeTreeData.fire();
+	Refresh(node?: GlueTreeItem): void {
+		this._onDidChangeTreeData.fire(node);
 	}
 
 	getTreeItem(element: GlueTreeItem): vscode.TreeItem {
@@ -28,13 +28,41 @@ export class GlueTreeDataProvider implements vscode.TreeDataProvider<GlueTreeIte
 					new GlueTreeItem("/aws-glue/jobs/error", TreeItemType.LogGroup, element.Region, element.ResourceName, vscode.TreeItemCollapsibleState.Collapsed, undefined, element)
 				];
 			}
-			if (element.TreeItemType === TreeItemType.LogGroup) {
-				// Log streams will be added dynamically by RefreshLogStreams
-				return element.ResourceName.split('|').map(s => new GlueTreeItem(s, TreeItemType.LogStream, element.Region, s, vscode.TreeItemCollapsibleState.None, undefined, element)).filter(node => node.label !== element.ResourceName);
-			}
 			if (element.TreeItemType === TreeItemType.RunGroup) {
 				// Runs will be added dynamically by RefreshRuns
-				return element.ResourceName.split('|').map(s => new GlueTreeItem(s, TreeItemType.Run, element.Region, s, vscode.TreeItemCollapsibleState.None, undefined, element)).filter(node => node.label !== element.ResourceName);
+				let runs = element.Payload;
+				if (element.Parent && GlueTreeView.Current.JobRunsCache[element.Parent.ResourceName]) {
+					runs = GlueTreeView.Current.JobRunsCache[element.Parent.ResourceName];
+				}
+
+				if (!runs) return [];
+				if (runs.length === 0) return [new GlueTreeItem("No Runs Found", TreeItemType.Detail, element.Region, "", vscode.TreeItemCollapsibleState.None, undefined, element)];
+				
+				return (runs as any[]).map(run => {
+					let runLabel = `${run.Id} (${run.JobRunState})`;
+					return new GlueTreeItem(runLabel, TreeItemType.Run, element.Region, run.Id, vscode.TreeItemCollapsibleState.Collapsed, undefined, element, run);
+				});
+			}
+			if (element.TreeItemType === TreeItemType.LogGroup) {
+				// Log streams will be added dynamically by RefreshLogStreams
+				let streams = GlueTreeView.Current.LogStreamsCache[element.label!];
+				if (!streams) return [];
+				if (streams.length === 0) return [new GlueTreeItem("No Logs Found", TreeItemType.Detail, element.Region, "", vscode.TreeItemCollapsibleState.None, undefined, element)];
+				
+				return streams.map(s => new GlueTreeItem(s, TreeItemType.LogStream, element.Region, s, vscode.TreeItemCollapsibleState.None, undefined, element));
+			}
+			if (element.TreeItemType === TreeItemType.Run) {
+				if (!element.Payload) return [];
+				let run = element.Payload;
+				let details = [
+					`Id: ${run.Id}`,
+					`Status: ${run.JobRunState}`,
+					`Started: ${run.StartedOn ? new Date(run.StartedOn).toLocaleString() : 'N/A'}`,
+					`Completed: ${run.CompletedOn ? new Date(run.CompletedOn).toLocaleString() : 'N/A'}`,
+					`ExecutionTime: ${run.ExecutionTime}s`,
+					`ErrorMessage: ${run.ErrorMessage || 'None'}`
+				];
+				return details.map(d => new GlueTreeItem(d, TreeItemType.Detail, element.Region, "", vscode.TreeItemCollapsibleState.None, undefined, element));
 			}
 			return [];
 		} else {
@@ -45,6 +73,9 @@ export class GlueTreeDataProvider implements vscode.TreeDataProvider<GlueTreeIte
 				if (GlueTreeView.Current.FilterString && !res.Name.includes(GlueTreeView.Current.FilterString)) continue;
 				
 				let type = res.Type as TreeItemType;
+				if (type !== TreeItemType.Job) {
+					type = TreeItemType.Job; // Migration: default to Job
+				}
 				items.push(new GlueTreeItem(res.Name, type, res.Region, res.Name, vscode.TreeItemCollapsibleState.Collapsed));
 			}
 
@@ -64,13 +95,5 @@ export class GlueTreeDataProvider implements vscode.TreeDataProvider<GlueTreeIte
 		this.Refresh();
 	}
 
-	AddLogStreams(node: GlueTreeItem, streams: string[]) {
-		node.ResourceName = streams.join('|'); // Hacky way to store children in ResourceName for demo
-		this.Refresh();
-	}
 
-	AddRuns(node: GlueTreeItem, runs: any[]) {
-		node.ResourceName = runs.map(r => `${r.Id} (${r.JobRunState})`).join('|');
-		this.Refresh();
-	}
 }

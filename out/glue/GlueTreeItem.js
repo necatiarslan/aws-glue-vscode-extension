@@ -10,6 +10,7 @@ var TreeItemType;
     TreeItemType["LogGroup"] = "LogGroup";
     TreeItemType["LogStream"] = "LogStream";
     TreeItemType["Run"] = "Run";
+    TreeItemType["Detail"] = "Detail";
 })(TreeItemType || (exports.TreeItemType = TreeItemType = {}));
 class GlueTreeItem extends vscode.TreeItem {
     label;
@@ -19,7 +20,8 @@ class GlueTreeItem extends vscode.TreeItem {
     collapsibleState;
     command;
     Parent;
-    constructor(label, TreeItemType, Region, ResourceName, collapsibleState, command, Parent) {
+    Payload;
+    constructor(label, TreeItemType, Region, ResourceName, collapsibleState, command, Parent, Payload) {
         super(label, collapsibleState);
         this.label = label;
         this.TreeItemType = TreeItemType;
@@ -28,6 +30,7 @@ class GlueTreeItem extends vscode.TreeItem {
         this.collapsibleState = collapsibleState;
         this.command = command;
         this.Parent = Parent;
+        this.Payload = Payload;
         this.contextValue = TreeItemType;
         this.setIcons();
     }
@@ -52,6 +55,9 @@ class GlueTreeItem extends vscode.TreeItem {
                 break;
             case TreeItemType.Run:
                 iconName = "play";
+                break;
+            case TreeItemType.Detail:
+                iconName = "info";
                 break;
         }
         if (this.IsRunning) {

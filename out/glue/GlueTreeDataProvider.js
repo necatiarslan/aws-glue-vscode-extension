@@ -9,8 +9,8 @@ class GlueTreeDataProvider {
     _onDidChangeTreeData = new vscode.EventEmitter();
     onDidChangeTreeData = this._onDidChangeTreeData.event;
     constructor() { }
-    Refresh() {
-        this._onDidChangeTreeData.fire();
+    Refresh(node) {
+        this._onDidChangeTreeData.fire(node);
     }
     getTreeItem(element) {
         return element;
@@ -24,13 +24,43 @@ class GlueTreeDataProvider {
                     new GlueTreeItem_1.GlueTreeItem("/aws-glue/jobs/error", GlueTreeItem_1.TreeItemType.LogGroup, element.Region, element.ResourceName, vscode.TreeItemCollapsibleState.Collapsed, undefined, element)
                 ];
             }
-            if (element.TreeItemType === GlueTreeItem_1.TreeItemType.LogGroup) {
-                // Log streams will be added dynamically by RefreshLogStreams
-                return element.ResourceName.split('|').map(s => new GlueTreeItem_1.GlueTreeItem(s, GlueTreeItem_1.TreeItemType.LogStream, element.Region, s, vscode.TreeItemCollapsibleState.None, undefined, element)).filter(node => node.label !== element.ResourceName);
-            }
             if (element.TreeItemType === GlueTreeItem_1.TreeItemType.RunGroup) {
                 // Runs will be added dynamically by RefreshRuns
-                return element.ResourceName.split('|').map(s => new GlueTreeItem_1.GlueTreeItem(s, GlueTreeItem_1.TreeItemType.Run, element.Region, s, vscode.TreeItemCollapsibleState.None, undefined, element)).filter(node => node.label !== element.ResourceName);
+                let runs = element.Payload;
+                if (element.Parent && GlueTreeView_1.GlueTreeView.Current.JobRunsCache[element.Parent.ResourceName]) {
+                    runs = GlueTreeView_1.GlueTreeView.Current.JobRunsCache[element.Parent.ResourceName];
+                }
+                if (!runs)
+                    return [];
+                if (runs.length === 0)
+                    return [new GlueTreeItem_1.GlueTreeItem("No Runs Found", GlueTreeItem_1.TreeItemType.Detail, element.Region, "", vscode.TreeItemCollapsibleState.None, undefined, element)];
+                return runs.map(run => {
+                    let runLabel = `${run.Id} (${run.JobRunState})`;
+                    return new GlueTreeItem_1.GlueTreeItem(runLabel, GlueTreeItem_1.TreeItemType.Run, element.Region, run.Id, vscode.TreeItemCollapsibleState.Collapsed, undefined, element, run);
+                });
+            }
+            if (element.TreeItemType === GlueTreeItem_1.TreeItemType.LogGroup) {
+                // Log streams will be added dynamically by RefreshLogStreams
+                let streams = GlueTreeView_1.GlueTreeView.Current.LogStreamsCache[element.label];
+                if (!streams)
+                    return [];
+                if (streams.length === 0)
+                    return [new GlueTreeItem_1.GlueTreeItem("No Logs Found", GlueTreeItem_1.TreeItemType.Detail, element.Region, "", vscode.TreeItemCollapsibleState.None, undefined, element)];
+                return streams.map(s => new GlueTreeItem_1.GlueTreeItem(s, GlueTreeItem_1.TreeItemType.LogStream, element.Region, s, vscode.TreeItemCollapsibleState.None, undefined, element));
+            }
+            if (element.TreeItemType === GlueTreeItem_1.TreeItemType.Run) {
+                if (!element.Payload)
+                    return [];
+                let run = element.Payload;
+                let details = [
+                    `Id: ${run.Id}`,
+                    `Status: ${run.JobRunState}`,
+                    `Started: ${run.StartedOn ? new Date(run.StartedOn).toLocaleString() : 'N/A'}`,
+                    `Completed: ${run.CompletedOn ? new Date(run.CompletedOn).toLocaleString() : 'N/A'}`,
+                    `ExecutionTime: ${run.ExecutionTime}s`,
+                    `ErrorMessage: ${run.ErrorMessage || 'None'}`
+                ];
+                return details.map(d => new GlueTreeItem_1.GlueTreeItem(d, GlueTreeItem_1.TreeItemType.Detail, element.Region, "", vscode.TreeItemCollapsibleState.None, undefined, element));
             }
             return [];
         }
@@ -41,6 +71,9 @@ class GlueTreeDataProvider {
                 if (GlueTreeView_1.GlueTreeView.Current.FilterString && !res.Name.includes(GlueTreeView_1.GlueTreeView.Current.FilterString))
                     continue;
                 let type = res.Type;
+                if (type !== GlueTreeItem_1.TreeItemType.Job) {
+                    type = GlueTreeItem_1.TreeItemType.Job; // Migration: default to Job
+                }
                 items.push(new GlueTreeItem_1.GlueTreeItem(res.Name, type, res.Region, res.Name, vscode.TreeItemCollapsibleState.Collapsed));
             }
             return items;
@@ -54,14 +87,6 @@ class GlueTreeDataProvider {
     }
     RemoveResource(region, name, type) {
         GlueTreeView_1.GlueTreeView.Current.ResourceList = GlueTreeView_1.GlueTreeView.Current.ResourceList.filter(r => !(r.Region === region && r.Name === name && r.Type === type));
-        this.Refresh();
-    }
-    AddLogStreams(node, streams) {
-        node.ResourceName = streams.join('|'); // Hacky way to store children in ResourceName for demo
-        this.Refresh();
-    }
-    AddRuns(node, runs) {
-        node.ResourceName = runs.map(r => `${r.Id} (${r.JobRunState})`).join('|');
         this.Refresh();
     }
 }

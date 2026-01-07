@@ -18,6 +18,8 @@ export class GlueTreeView {
 	public AwsProfile: string = "default";	
 	public AwsEndPoint: string | undefined;
 	public ResourceList: {Region: string, Name: string, Type: string}[] = [];
+	public JobRunsCache: {[key: string]: any[]} = {};
+	public LogStreamsCache: {[key: string]: string[]} = {};
 
 	constructor(context: vscode.ExtensionContext) {
 		GlueTreeView.Current = this;
@@ -231,15 +233,36 @@ export class GlueTreeView {
 
 	async RefreshLogStreams(node: GlueTreeItem) {
 		if(node.TreeItemType !== TreeItemType.LogGroup) return;
-		let resultLogs = await api.GetLatestLogGroupLogStreamList(node.Region, node.label!);
-		if(!resultLogs.isSuccessful) return;
-		this.treeDataProvider.AddLogStreams(node, resultLogs.result)
+
+		vscode.window.withProgress({
+			location: vscode.ProgressLocation.Window,
+			title: `Aws Glue: Loading Log Streams for ${node.label}...`,
+		}, async (progress, token) => {
+			let resultLogs = await api.GetLatestLogGroupLogStreamList(node.Region, node.label!);
+			if(!resultLogs.isSuccessful) {
+				ui.showErrorMessage('Get Logs Error!', resultLogs.error);
+				return;
+			}
+			this.LogStreamsCache[node.label!] = resultLogs.result;
+			this.treeDataProvider.Refresh();
+		});
 	}
 
 	async RefreshRuns(node: GlueTreeItem) {
 		if(node.TreeItemType !== TreeItemType.RunGroup || !node.Parent) return;
-		let resultRuns = await api.GetGlueJobRuns(node.Region, node.Parent.ResourceName);
-		if(!resultRuns.isSuccessful) return;
-		this.treeDataProvider.AddRuns(node, resultRuns.result)
+
+		vscode.window.withProgress({
+			location: vscode.ProgressLocation.Window,
+			title: `Aws Glue: Loading Runs for ${node.Parent.ResourceName}...`,
+		}, async (progress, token) => {
+			let resultRuns = await api.GetGlueJobRuns(node.Region, node.Parent!.ResourceName);
+			if(!resultRuns.isSuccessful) {
+				ui.showErrorMessage('Get Runs Error!', resultRuns.error);
+				return;
+			}
+			this.JobRunsCache[node.Parent!.ResourceName] = resultRuns.result;
+			ui.logToOutput(`Fetched ${resultRuns.result.length} runs for ${node.Parent!.ResourceName}`);
+			this.treeDataProvider.Refresh();
+		});
 	}
 }
