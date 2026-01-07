@@ -1,0 +1,72 @@
+{
+  "Comment": "Example Step Functions ASL with multiple steps: Initialize, Choice, Parallel branches, Wait, Finalize, Succeed",
+  "StartAt": "Initialize",
+  "States": {
+    "Initialize": {
+      "Type": "Pass",
+      "Result": { "initialized": true },
+      "ResultPath": "$.init",
+      "Next": "CheckCondition"
+    },
+    "CheckCondition": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.runParallel",
+          "BooleanEquals": true,
+          "Next": "ParallelProcessing"
+        }
+      ],
+      "Default": "QuickPass"
+    },
+    "ParallelProcessing": {
+      "Type": "Parallel",
+      "Branches": [
+        {
+          "StartAt": "Branch1Step1",
+          "States": {
+            "Branch1Step1": {
+              "Type": "Pass",
+              "Result": "Branch1-OK",
+              "End": true
+            }
+          }
+        },
+        {
+          "StartAt": "Branch2Step1",
+          "States": {
+            "Branch2Step1": {
+              "Type": "Pass",
+              "Result": "Branch2-OK",
+              "End": true
+            }
+          }
+        }
+      ],
+      "Next": "WaitForCompletion"
+    },
+    "WaitForCompletion": {
+      "Type": "Wait",
+      "Seconds": 1,
+      "Next": "Finalize"
+    },
+    "QuickPass": {
+      "Type": "Pass",
+      "Result": "SkippedParallel",
+      "ResultPath": "$.quick",
+      "Next": "Finalize"
+    },
+    "Finalize": {
+      "Type": "Pass",
+      "Parameters": {
+        "summary.$": "$",
+        "finalizedAt.$": "$$.State.EnteredTime"
+      },
+      "ResultPath": "$.final",
+      "Next": "SuccessState"
+    },
+    "SuccessState": {
+      "Type": "Succeed"
+    }
+  }
+}
