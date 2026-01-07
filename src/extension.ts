@@ -1,174 +1,108 @@
 import * as vscode from 'vscode';
 import * as ui from './common/UI';
-import { StepFuncTreeView } from './step/StepFuncTreeView';
-import { StepFuncTreeItem } from './step/StepFuncTreeItem';
-import { StepFuncStudioEditorProvider } from './step/StepFuncStudioView';
+import { GlueTreeView } from './glue/GlueTreeView';
+import { GlueTreeItem } from './glue/GlueTreeItem';
 
 export function activate(context: vscode.ExtensionContext) {
-	ui.logToOutput('Aws StepFunc Extension activation started');
+	ui.logToOutput('Aws Glue Extension activation started');
 
-	// Register Workflow Studio custom editor provider
-	context.subscriptions.push(
-		StepFuncStudioEditorProvider.register(context)
-	);
+	let treeView:GlueTreeView = new GlueTreeView(context);
 
-	let treeView:StepFuncTreeView = new StepFuncTreeView(context);
-
-	vscode.commands.registerCommand('StepFuncTreeView.Refresh', () => {
+	vscode.commands.registerCommand('GlueTreeView.Refresh', () => {
 		treeView.Refresh();
 	});
 
-	vscode.commands.registerCommand('StepFuncTreeView.Filter', () => {
+	vscode.commands.registerCommand('GlueTreeView.Filter', () => {
 		treeView.Filter();
 	});
 
-	vscode.commands.registerCommand('StepFuncTreeView.ShowOnlyFavorite', () => {
+	vscode.commands.registerCommand('GlueTreeView.ShowOnlyFavorite', () => {
 		treeView.ShowOnlyFavorite();
 	});
 
-	vscode.commands.registerCommand('StepFuncTreeView.ShowHiddenNodes', () => {
+	vscode.commands.registerCommand('GlueTreeView.ShowHiddenNodes', () => {
 		treeView.ShowHiddenNodes();
 	});
 
-	vscode.commands.registerCommand('StepFuncTreeView.AddToFav', (node: StepFuncTreeItem) => {
+	vscode.commands.registerCommand('GlueTreeView.AddToFav', (node: GlueTreeItem) => {
 		treeView.AddToFav(node);
 	});
 
-	vscode.commands.registerCommand('StepFuncTreeView.DeleteFromFav', (node: StepFuncTreeItem) => {
+	vscode.commands.registerCommand('GlueTreeView.DeleteFromFav', (node: GlueTreeItem) => {
 		treeView.DeleteFromFav(node);
 	});
 
-	vscode.commands.registerCommand('StepFuncTreeView.HideNode', (node: StepFuncTreeItem) => {
+	vscode.commands.registerCommand('GlueTreeView.HideNode', (node: GlueTreeItem) => {
 		treeView.HideNode(node);
 	});
 
-	vscode.commands.registerCommand('StepFuncTreeView.UnHideNode', (node: StepFuncTreeItem) => {
+	vscode.commands.registerCommand('GlueTreeView.UnHideNode', (node: GlueTreeItem) => {
 		treeView.UnHideNode(node);
 	});
 
-	vscode.commands.registerCommand('StepFuncTreeView.AddStepFunc', () => {
-		treeView.AddStepFunc();
+	vscode.commands.registerCommand('GlueTreeView.AddGlueResource', () => {
+		treeView.AddGlueResource();
 	});
 
-	vscode.commands.registerCommand('StepFuncTreeView.RemoveStepFunc', (node: StepFuncTreeItem) => {
-		treeView.RemoveStepFunc(node);
+	vscode.commands.registerCommand('GlueTreeView.RemoveGlueResource', (node: GlueTreeItem) => {
+		treeView.RemoveGlueResource(node);
 	});
 
-	vscode.commands.registerCommand('StepFuncTreeView.Goto', (node: StepFuncTreeItem) => {
+	vscode.commands.registerCommand('GlueTreeView.Goto', (node: GlueTreeItem) => {
 		treeView.Goto(node);
 	});
 
-	vscode.commands.registerCommand('StepFuncTreeView.SelectAwsProfile', (node: StepFuncTreeItem) => {
+	vscode.commands.registerCommand('GlueTreeView.SelectAwsProfile', (node: GlueTreeItem) => {
 		treeView.SelectAwsProfile(node);
 	});
 
-	vscode.commands.registerCommand('StepFuncTreeView.TestAwsConnection', () => {
+	vscode.commands.registerCommand('GlueTreeView.TestAwsConnection', () => {
 		treeView.TestAwsConnection();
 	});
 
-	vscode.commands.registerCommand('StepFuncTreeView.UpdateAwsEndPoint', () => {
+	vscode.commands.registerCommand('GlueTreeView.UpdateAwsEndPoint', () => {
 		treeView.UpdateAwsEndPoint();
 	});
 
-	vscode.commands.registerCommand('StepFuncTreeView.Donate', () => {
+	vscode.commands.registerCommand('GlueTreeView.Donate', () => {
 		treeView.Donate();
 	});
 
-	vscode.commands.registerCommand('StepFuncTreeView.BugAndNewFeature', () => {
+	vscode.commands.registerCommand('GlueTreeView.BugAndNewFeature', () => {
 		treeView.BugAndNewFeature();
 	});
 
-	vscode.commands.registerCommand('StepFuncTreeView.TriggerStepFunc', (node: StepFuncTreeItem) => {
-		treeView.TriggerStepFunc(node);
+	vscode.commands.registerCommand('GlueTreeView.RunJob', (node: GlueTreeItem) => {
+		treeView.RunJob(node);
 	});
 
-	vscode.commands.registerCommand('StepFuncTreeView.ViewLatestLog', (node: StepFuncTreeItem) => {
+	vscode.commands.registerCommand('GlueTreeView.RunCrawler', (node: GlueTreeItem) => {
+		treeView.RunCrawler(node);
+	});
+
+	vscode.commands.registerCommand('GlueTreeView.ViewLatestLog', (node: GlueTreeItem) => {
 		treeView.ViewLatestLog(node);
 	});
 
-	vscode.commands.registerCommand('StepFuncTreeView.StepFuncView', (node: StepFuncTreeItem) => {
-		treeView.StepFuncView(node);
+	vscode.commands.registerCommand('GlueTreeView.PrintResource', async (node: GlueTreeItem) => {
+		await treeView.PrintResource(node);
 	});
 
-	vscode.commands.registerCommand('StepFuncTreeView.PrintStepFunc', async (node: StepFuncTreeItem) => {
-		await treeView.PrintStepFunc(node);
-	});
-
-	vscode.commands.registerCommand('StepFuncTreeView.UpdateStepFuncCodes', async (node: StepFuncTreeItem) => {
-		await treeView.UpdateStepFuncCodes(node);
-	});
-
-	vscode.commands.registerCommand('StepFuncTreeView.SetCodePath', async (node: StepFuncTreeItem) => {
-		await treeView.SetCodePath(node);
-	});
-
-	vscode.commands.registerCommand('StepFuncTreeView.UnsetCodePath', async (node: StepFuncTreeItem) => {
-		await treeView.UnsetCodePath(node);
-	});
-
-	vscode.commands.registerCommand('StepFuncTreeView.OpenCodeFile', async (node: StepFuncTreeItem) => {
-		await treeView.OpenCodeFile(node);
-	});
-
-	vscode.commands.registerCommand('StepFuncTreeView.DownloadDefinitionFromAWS', async (node: StepFuncTreeItem) => {
-		await treeView.DownloadDefinitionFromAWS(node);
-	});
-
-	vscode.commands.registerCommand('StepFuncTreeView.CompareLocalWithAWS', async (node: StepFuncTreeItem) => {
-		await treeView.CompareLocalWithAWS(node);
-	});
-
-	vscode.commands.registerCommand('StepFuncTreeView.ViewCodeGraph', async (node: StepFuncTreeItem) => {
-		await treeView.ViewCodeGraph(node);
-	});
-
-	vscode.commands.registerCommand('StepFuncTreeView.ViewLog', async (node: StepFuncTreeItem) => {
+	vscode.commands.registerCommand('GlueTreeView.ViewLog', async (node: GlueTreeItem) => {
 		await treeView.ViewLog(node);
 	});
 
-	vscode.commands.registerCommand('StepFuncTreeView.ViewResponsePayload', async (node: StepFuncTreeItem) => {
-		await treeView.ViewResponsePayload(node);
-	});
-
-	vscode.commands.registerCommand('StepFuncTreeView.RefreshLogs', async (node: StepFuncTreeItem) => {
+	vscode.commands.registerCommand('GlueTreeView.RefreshLogs', async (node: GlueTreeItem) => {
 		await treeView.RefreshLogStreams(node);
 	});
 
-	vscode.commands.registerCommand('StepFuncTreeView.RefreshExecutions', async (node: StepFuncTreeItem) => {
-		await treeView.RefreshExecutions(node);
+	vscode.commands.registerCommand('GlueTreeView.RefreshRuns', async (node: GlueTreeItem) => {
+		await treeView.RefreshRuns(node);
 	});
 
-	vscode.commands.registerCommand('StepFuncTreeView.RefreshSuccessfulExecutions', async (node: StepFuncTreeItem) => {
-		await treeView.RefreshSuccessfulExecutions(node);
-	});
-
-	vscode.commands.registerCommand('StepFuncTreeView.RefreshFailedExecutions', async (node: StepFuncTreeItem) => {
-		await treeView.RefreshFailedExecutions(node);
-	});
-
-	vscode.commands.registerCommand('StepFuncTreeView.RefreshRunningExecutions', async (node: StepFuncTreeItem) => {
-		await treeView.RefreshRunningExecutions(node);
-	});
-
-	vscode.commands.registerCommand('StepFuncTreeView.RemovePayloadPath', async (node: StepFuncTreeItem) => {
-		await treeView.RemovePayloadPath(node);
-	});
-
-	vscode.commands.registerCommand('StepFuncTreeView.AddPayloadPath', async (node: StepFuncTreeItem) => {
-		await treeView.AddPayloadPath(node);
-	});
-
-	vscode.commands.registerCommand('StepFuncTreeView.ViewExecutionDetails', async (node: StepFuncTreeItem) => {
-		await treeView.ViewExecutionDetails(node);
-	});
-
-	vscode.commands.registerCommand('StepFuncTreeView.ViewExecutionLog', async (node: StepFuncTreeItem) => {
-		await treeView.ViewExecutionLog(node);
-	});
-
-	ui.logToOutput('Aws StepFunc Extension activation completed');
+	ui.logToOutput('Aws Glue Extension activation completed');
 }
 
 export function deactivate() {
-	ui.logToOutput('Aws StepFunc is now de-active!');
+	ui.logToOutput('Aws Glue is now de-active!');
 }

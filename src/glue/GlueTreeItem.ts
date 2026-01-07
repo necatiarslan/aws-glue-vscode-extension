@@ -1,0 +1,72 @@
+/* eslint-disable @typescript-eslint/naming-convention */
+import * as vscode from 'vscode';
+import { join } from 'path';
+
+export enum TreeItemType {
+	Job = "Job",
+	Crawler = "Crawler",
+	Trigger = "Trigger",
+	RunGroup = "RunGroup",
+	LogGroup = "LogGroup",
+	LogStream = "LogStream",
+	Run = "Run"
+}
+
+export class GlueTreeItem extends vscode.TreeItem {
+
+	constructor(
+		public readonly label: string,
+		public readonly TreeItemType: TreeItemType,
+		public readonly Region: string,
+		public ResourceName: string,
+		public readonly collapsibleState: vscode.TreeItemCollapsibleState,
+		public readonly command?: vscode.Command,
+		public Parent?: GlueTreeItem
+	) {
+		super(label, collapsibleState);
+		this.contextValue = TreeItemType;
+		this.setIcons();
+	}
+
+	public IsFav: boolean = false;
+	public IsHidden: boolean = false;
+	public IsRunning: boolean = false;
+	public RunId: string | undefined;
+
+	setIcons() {
+		let iconName = "";
+		switch (this.TreeItemType) {
+			case TreeItemType.Job:
+				iconName = "settings-gear";
+				break;
+			case TreeItemType.Crawler:
+				iconName = "search";
+				break;
+			case TreeItemType.Trigger:
+				iconName = "zap";
+				break;
+			case TreeItemType.RunGroup:
+				iconName = "history";
+				break;
+			case TreeItemType.LogGroup:
+				iconName = "output";
+				break;
+			case TreeItemType.LogStream:
+				iconName = "list-unordered";
+				break;
+			case TreeItemType.Run:
+				iconName = "play";
+				break;
+		}
+
+		if (this.IsRunning) {
+			this.iconPath = new vscode.ThemeIcon("sync~spin");
+		} else {
+			this.iconPath = new vscode.ThemeIcon(iconName);
+		}
+	}
+
+	refreshUI() {
+		this.setIcons();
+	}
+}

@@ -1,14 +1,14 @@
 {
-  "name": "aws-step-functions-vscode-extension",
-  "displayName": "Aws Step Functions",
-  "description": "Update, Trigger & Monitor your Aws Step Functions",
+  "name": "aws-glue-vscode-extension",
+  "displayName": "Aws Glue",
+  "description": "Update, Trigger & Monitor your Aws Glue Jobs, Crawlers and Triggers",
   "version": "1.0.0",
   "publisher": "NecatiARSLAN",
   "repository": {
     "type": "git",
-    "url": "https://github.com/necatiarslan/aws-step-functions-vscode-extension"
+    "url": "https://github.com/necatiarslan/aws-glue-vscode-extension"
   },
-  "icon": "media/aws-step-functions-logo-extension.png",
+  "icon": "media/aws-glue-logo-extension.png",
   "engines": {
     "vscode": "^1.104.0"
   },
@@ -17,199 +17,125 @@
   ],
   "keywords": [
     "AWS",
-    "Step Functions"
+    "Glue",
+    "ETL"
   ],
   "activationEvents": [],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "StepFuncTreeView.Refresh",
+        "command": "GlueTreeView.Refresh",
         "title": "Refresh",
         "icon": "$(refresh)"
       },
       {
-        "command": "StepFuncTreeView.Filter",
+        "command": "GlueTreeView.Filter",
         "title": "Filter",
         "icon": "$(filter)"
       },
       {
-        "command": "StepFuncTreeView.ShowOnlyFavorite",
+        "command": "GlueTreeView.ShowOnlyFavorite",
         "title": "Show Only Favorite",
         "icon": "$(bookmark)"
       },
       {
-        "command": "StepFuncTreeView.ShowHiddenNodes",
+        "command": "GlueTreeView.ShowHiddenNodes",
         "title": "Show Hidden Nodes",
         "icon": "$(eye-closed)"
       },
       {
-        "command": "StepFuncTreeView.AddToFav",
+        "command": "GlueTreeView.AddToFav",
         "title": "Fav",
         "icon": "$(star)"
       },
       {
-        "command": "StepFuncTreeView.DeleteFromFav",
+        "command": "GlueTreeView.DeleteFromFav",
         "title": "UnFav",
         "icon": "$(star-empty)"
       },
       {
-        "command": "StepFuncTreeView.HideNode",
+        "command": "GlueTreeView.HideNode",
         "title": "Hide",
         "icon": "$(eye-closed)"
       },
       {
-        "command": "StepFuncTreeView.UnHideNode",
+        "command": "GlueTreeView.UnHideNode",
         "title": "UnHide",
         "icon": "$(eye)"
       },
       {
-        "command": "StepFuncTreeView.AddStepFunc",
-        "title": "Add StepFunc",
+        "command": "GlueTreeView.AddGlueResource",
+        "title": "Add Glue Resource",
         "icon": "$(add)"
       },
       {
-        "command": "StepFuncTreeView.RemoveStepFunc",
-        "title": "Remove StepFunc",
+        "command": "GlueTreeView.RemoveGlueResource",
+        "title": "Remove Glue Resource",
         "icon": "$(trash)"
       },
       {
-        "command": "StepFuncTreeView.Goto",
+        "command": "GlueTreeView.Goto",
         "title": "Goto Aws Console",
         "icon": "$(link-external)"
       },
       {
-        "command": "StepFuncTreeView.SelectAwsProfile",
+        "command": "GlueTreeView.SelectAwsProfile",
         "title": "Select Aws Profile",
         "icon": "$(account)"
       },
       {
-        "command": "StepFuncTreeView.TriggerStepFunc",
-        "title": "Trigger",
+        "command": "GlueTreeView.RunJob",
+        "title": "Run Job",
         "icon": "$(run)"
       },
       {
-        "command": "StepFuncTreeView.StepFuncView",
-        "title": "StepFunc View",
-        "icon": "$(preview)"
+        "command": "GlueTreeView.RunCrawler",
+        "title": "Run Crawler",
+        "icon": "$(run)"
       },
       {
-        "command": "StepFuncTreeView.ViewLatestLog",
+        "command": "GlueTreeView.ViewLatestLog",
         "title": "Latest Logs",
         "icon": "$(output)"
       },
       {
-        "command": "StepFuncTreeView.AddPayloadPath",
-        "title": "Add Payload File",
-        "icon": "$(add)"
-      },
-      {
-        "command": "StepFuncTreeView.RemovePayloadPath",
-        "title": "Remove Paylod File",
-        "icon": "$(trash)"
-      },
-      {
-        "command": "StepFuncTreeView.RefreshLogs",
+        "command": "GlueTreeView.RefreshLogs",
         "title": "Refresh Logs",
         "icon": "$(refresh)"
       },
       {
-        "command": "StepFuncTreeView.RefreshExecutions",
-        "title": "Refresh Executions",
+        "command": "GlueTreeView.RefreshRuns",
+        "title": "Refresh Runs",
         "icon": "$(refresh)"
       },
       {
-        "command": "StepFuncTreeView.RefreshRunningExecutions",
-        "title": "Refresh Running Executions",
-        "icon": "$(refresh)"
-      },
-      {
-        "command": "StepFuncTreeView.RefreshSuccessfulExecutions",
-        "title": "Refresh Successful Executions",
-        "icon": "$(refresh)"
-      },
-      {
-        "command": "StepFuncTreeView.RefreshFailedExecutions",
-        "title": "Refresh Failed Executions",
-        "icon": "$(refresh)"
-      },
-      {
-        "command": "StepFuncTreeView.ViewLog",
+        "command": "GlueTreeView.ViewLog",
         "title": "View Log",
         "icon": "$(output)"
       },
       {
-        "command": "StepFuncTreeView.ViewResponsePayload",
-        "title": "View Payload",
-        "icon": "$(output)"
-      },
-      {
-        "command": "StepFuncTreeView.ViewExecutionDetails",
-        "title": "View Execution Details",
-        "icon": "$(json)"
-      },
-      {
-        "command": "StepFuncTreeView.ViewExecutionLog",
-        "title": "View Execution Log",
-        "icon": "$(output)"
-      },
-      {
-        "command": "StepFuncTreeView.SetCodePath",
-        "title": "Set Code Path",
-        "icon": "$(folder-library)"
-      },
-      {
-        "command": "StepFuncTreeView.UpdateStepFuncCodes",
-        "title": "Update StepFunc Codes",
-        "icon": "$(cloud-upload)"
-      },
-      {
-        "command": "StepFuncTreeView.UnsetCodePath",
-        "title": "Unset Code Path",
-        "icon": "$(trash)"
-      },
-      {
-        "command": "StepFuncTreeView.OpenCodeFile",
-        "title": "Open Source File",
-        "icon": "$(go-to-file)"
-      },
-      {
-        "command": "StepFuncTreeView.DownloadDefinitionFromAWS",
-        "title": "Download Definition from AWS",
-        "icon": "$(cloud-download)"
-      },
-      {
-        "command": "StepFuncTreeView.CompareLocalWithAWS",
-        "title": "Compare Local with AWS",
-        "icon": "$(diff)"
-      },
-      {
-        "command": "StepFuncTreeView.ViewCodeGraph",
-        "title": "View Graph",
-        "icon": "$(graph)"
-      },
-      {
-        "command": "StepFuncTreeView.PrintStepFunc",
-        "title": "Print StepFunc",
+        "command": "GlueTreeView.PrintResource",
+        "title": "Print Resource",
         "icon": "$(debug-print)"
       },
       {
-        "command": "StepFuncTreeView.TestAwsConnection",
+        "command": "GlueTreeView.TestAwsConnection",
         "title": "Test Aws Connection",
         "icon": "$(plug)"
       },
       {
-        "command": "StepFuncTreeView.UpdateAwsEndPoint",
+        "command": "GlueTreeView.UpdateAwsEndPoint",
         "title": "Update Aws EndPoint",
         "icon": "$(settings)"
       },
       {
-        "command": "StepFuncTreeView.Donate",
+        "command": "GlueTreeView.Donate",
         "title": "Donate",
         "icon": "$(heart)"
       },
       {
-        "command": "StepFuncTreeView.BugAndNewFeature",
+        "command": "GlueTreeView.BugAndNewFeature",
         "title": "Bug and New Feature",
         "icon": "$(issues)"
       }
@@ -217,233 +143,146 @@
     "menus": {
       "view/title": [
         {
-          "command": "StepFuncTreeView.ShowOnlyFavorite",
-          "when": "view == StepFuncTreeView",
+          "command": "GlueTreeView.ShowOnlyFavorite",
+          "when": "view == GlueTreeView",
           "group": "navigation@1"
         },
         {
-          "command": "StepFuncTreeView.ShowHiddenNodes",
-          "when": "view == StepFuncTreeView",
+          "command": "GlueTreeView.ShowHiddenNodes",
+          "when": "view == GlueTreeView",
           "group": "navigation@2"
         },
         {
-          "command": "StepFuncTreeView.Filter",
-          "when": "view == StepFuncTreeView",
+          "command": "GlueTreeView.Filter",
+          "when": "view == GlueTreeView",
           "group": "navigation@3"
         },
         {
-          "command": "StepFuncTreeView.AddStepFunc",
-          "when": "view == StepFuncTreeView",
+          "command": "GlueTreeView.AddGlueResource",
+          "when": "view == GlueTreeView",
           "group": "navigation@4"
         },
         {
-          "command": "StepFuncTreeView.SelectAwsProfile",
-          "when": "view == StepFuncTreeView",
+          "command": "GlueTreeView.SelectAwsProfile",
+          "when": "view == GlueTreeView",
           "group": "navigation@6"
         },
         {
-          "command": "StepFuncTreeView.Refresh",
-          "when": "view == StepFuncTreeView",
+          "command": "GlueTreeView.Refresh",
+          "when": "view == GlueTreeView",
           "group": "navigation@7"
         },
         {
-          "command": "StepFuncTreeView.TestAwsConnection",
-          "when": "view == StepFuncTreeView",
+          "command": "GlueTreeView.TestAwsConnection",
+          "when": "view == GlueTreeView",
           "group": "other"
         },
         {
-          "command": "StepFuncTreeView.UpdateAwsEndPoint",
-          "when": "view == StepFuncTreeView",
+          "command": "GlueTreeView.UpdateAwsEndPoint",
+          "when": "view == GlueTreeView",
           "group": "other"
         },
         {
-          "command": "StepFuncTreeView.Donate",
-          "when": "view == StepFuncTreeView",
+          "command": "GlueTreeView.Donate",
+          "when": "view == GlueTreeView",
           "group": "other"
         },
         {
-          "command": "StepFuncTreeView.BugAndNewFeature",
-          "when": "view == StepFuncTreeView",
+          "command": "GlueTreeView.BugAndNewFeature",
+          "when": "view == GlueTreeView",
           "group": "other"
         }
       ],
       "view/item/context": [
         {
-          "command": "StepFuncTreeView.AddToFav",
-          "when": "view == StepFuncTreeView && viewItem == StepFunc",
+          "command": "GlueTreeView.AddToFav",
+          "when": "view == GlueTreeView && (viewItem == Job || viewItem == Crawler || viewItem == Trigger)",
           "group": "Filter"
         },
         {
-          "command": "StepFuncTreeView.DeleteFromFav",
-          "when": "view == StepFuncTreeView && viewItem == StepFunc",
+          "command": "GlueTreeView.DeleteFromFav",
+          "when": "view == GlueTreeView && (viewItem == Job || viewItem == Crawler || viewItem == Trigger)",
           "group": "Filter"
         },
         {
-          "command": "StepFuncTreeView.HideNode",
-          "when": "view == StepFuncTreeView && viewItem == StepFunc",
+          "command": "GlueTreeView.HideNode",
+          "when": "view == GlueTreeView && (viewItem == Job || viewItem == Crawler || viewItem == Trigger)",
           "group": "Filter"
         },
         {
-          "command": "StepFuncTreeView.UnHideNode",
-          "when": "view == StepFuncTreeView && viewItem == StepFunc",
+          "command": "GlueTreeView.UnHideNode",
+          "when": "view == GlueTreeView && (viewItem == Job || viewItem == Crawler || viewItem == Trigger)",
           "group": "Filter"
         },
         {
-          "command": "StepFuncTreeView.RemoveStepFunc",
-          "when": "view == StepFuncTreeView && viewItem == StepFunc",
-          "group": "StepFunc"
+          "command": "GlueTreeView.RemoveGlueResource",
+          "when": "view == GlueTreeView && (viewItem == Job || viewItem == Crawler || viewItem == Trigger)",
+          "group": "Glue"
         },
         {
-          "command": "StepFuncTreeView.Goto",
-          "when": "view == StepFuncTreeView && viewItem == StepFunc",
-          "group": "StepFunc"
+          "command": "GlueTreeView.Goto",
+          "when": "view == GlueTreeView && (viewItem == Job || viewItem == Crawler || viewItem == Trigger)",
+          "group": "Glue"
         },
         {
-          "command": "StepFuncTreeView.TriggerStepFunc",
-          "when": "view == StepFuncTreeView && (viewItem == StepFunc || viewItem == TriggerConfig || viewItem == TriggerSavedPayload || viewItem == TriggerWithPayload || viewItem == TriggerFilePayload || viewItem == TriggerNoPayload)",
+          "command": "GlueTreeView.RunJob",
+          "when": "view == GlueTreeView && viewItem == Job",
           "group": "inline"
         },
         {
-          "command": "StepFuncTreeView.ViewLatestLog",
-          "when": "view == StepFuncTreeView && viewItem == StepFunc",
+          "command": "GlueTreeView.RunCrawler",
+          "when": "view == GlueTreeView && viewItem == Crawler",
           "group": "inline"
         },
         {
-          "command": "StepFuncTreeView.PrintStepFunc",
-          "when": "view == StepFuncTreeView && viewItem == StepFunc",
+          "command": "GlueTreeView.ViewLatestLog",
+          "when": "view == GlueTreeView && (viewItem == Job || viewItem == Crawler)",
           "group": "inline"
         },
         {
-          "command": "StepFuncTreeView.SetCodePath",
-          "when": "view == StepFuncTreeView && (viewItem == Code || viewItem == CodePath)",
+          "command": "GlueTreeView.PrintResource",
+          "when": "view == GlueTreeView && (viewItem == Job || viewItem == Crawler || viewItem == Trigger)",
           "group": "inline"
         },
         {
-          "command": "StepFuncTreeView.UnsetCodePath",
-          "when": "view == StepFuncTreeView && (viewItem == Code || viewItem == CodePath)",
+          "command": "GlueTreeView.RefreshLogs",
+          "when": "view == GlueTreeView && viewItem == LogGroup",
           "group": "inline"
         },
         {
-          "command": "StepFuncTreeView.OpenCodeFile",
-          "when": "view == StepFuncTreeView && (viewItem == Code || viewItem == CodePath)",
+          "command": "GlueTreeView.RefreshRuns",
+          "when": "view == GlueTreeView && viewItem == RunGroup",
           "group": "inline"
         },
         {
-          "command": "StepFuncTreeView.DownloadDefinitionFromAWS",
-          "when": "view == StepFuncTreeView && (viewItem == Code || viewItem == CodePath)",
-          "group": "inline"
-        },
-        {
-          "command": "StepFuncTreeView.CompareLocalWithAWS",
-          "when": "view == StepFuncTreeView && (viewItem == Code || viewItem == CodePath)",
-          "group": "inline"
-        },
-        {
-          "command": "StepFuncTreeView.ViewCodeGraph",
-          "when": "view == StepFuncTreeView && (viewItem == Code || viewItem == CodePath)",
-          "group": "inline"
-        },
-        {
-          "command": "StepFuncTreeView.UpdateStepFuncCodes",
-          "when": "view == StepFuncTreeView && (viewItem == Code || viewItem == CodePath)",
-          "group": "inline"
-        },
-        {
-          "command": "StepFuncTreeView.AddPayloadPath",
-          "when": "view == StepFuncTreeView && viewItem == TriggerGroup",
-          "group": "inline"
-        },
-        {
-          "command": "StepFuncTreeView.RemovePayloadPath",
-          "when": "view == StepFuncTreeView && viewItem == TriggerFilePayload",
-          "group": "inline"
-        },
-        {
-          "command": "StepFuncTreeView.RefreshLogs",
-          "when": "view == StepFuncTreeView && viewItem == LogGroup",
-          "group": "inline"
-        },
-        {
-          "command": "StepFuncTreeView.RefreshExecutions",
-          "when": "view == StepFuncTreeView && viewItem == ExecutionGroup",
-          "group": "inline"
-        },
-        {
-          "command": "StepFuncTreeView.RefreshRunningExecutions",
-          "when": "view == StepFuncTreeView && viewItem == RunningExecutionGroup",
-          "group": "inline"
-        },
-        {
-          "command": "StepFuncTreeView.RefreshSuccessfulExecutions",
-          "when": "view == StepFuncTreeView && viewItem == SuccessfulExecutionGroup",
-          "group": "inline"
-        },
-        {
-          "command": "StepFuncTreeView.RefreshFailedExecutions",
-          "when": "view == StepFuncTreeView && viewItem == FailedExecutionGroup",
-          "group": "inline"
-        },
-        {
-          "command": "StepFuncTreeView.ViewLog",
-          "when": "view == StepFuncTreeView && viewItem == LogStream",
-          "group": "inline"
-        },
-        {
-          "command": "StepFuncTreeView.ViewResponsePayload",
-          "when": "view == StepFuncTreeView && viewItem == ResponsePayload",
-          "group": "inline"
-        },
-        {
-          "command": "StepFuncTreeView.ViewExecutionDetails",
-          "when": "view == StepFuncTreeView && viewItem == Execution",
-          "group": "inline"
-        },
-        {
-          "command": "StepFuncTreeView.ViewExecutionLog",
-          "when": "view == StepFuncTreeView && viewItem == Execution",
+          "command": "GlueTreeView.ViewLog",
+          "when": "view == GlueTreeView && viewItem == LogStream",
           "group": "inline"
         }
       ]
     },
-    "customEditors": [
-      {
-        "viewType": "stepFuncStudio.asl",
-        "displayName": "Workflow Studio",
-        "selector": [
-          {
-            "filenamePattern": "*.asl.json"
-          },
-          {
-            "filenamePattern": "*.asl.yaml"
-          },
-          {
-            "filenamePattern": "*.asl.yml"
-          }
-        ]
-      }
-    ],
     "viewsContainers": {
       "activitybar": [
         {
-          "id": "aws-step-functions-vscode-extension",
-          "title": "Aws Step Functions",
-          "icon": "media/aws-step-functions-logo-activitybar.png"
+          "id": "aws-glue-vscode-extension",
+          "title": "Aws Glue",
+          "icon": "media/aws-glue-logo-activitybar.png"
         }
       ]
     },
     "views": {
-      "aws-step-functions-vscode-extension": [
+      "aws-glue-vscode-extension": [
         {
-          "id": "StepFuncTreeView",
-          "name": "Aws Step Functions",
-          "icon": "media/aws-step-functions-logo-activitybar.png"
+          "id": "GlueTreeView",
+          "name": "Aws Glue",
+          "icon": "media/aws-glue-logo-activitybar.png"
         }
       ]
     },
     "viewsWelcome": [
       {
-        "view": "StepFuncTreeView",
-        "contents": "Please click [+] to add your Step Functions. \n [Add StepFunc](command:StepFuncTreeView.AddStepFunc) \n Leave Step Function name empty to get all your Step Functions. You can enter Step Function name partially. \n If you can not connect after a while check your Aws Credentials, Network and Proxy settings. \n\n\n\n To Access Aws, you need to configure aws credentials. \n For more detail on Aws Credentials [Click Here](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html) \n For a Youtube Tutorial [Click Here](https://www.youtube.com/watch?v=SON8sY1iOBU) \n [Update Aws EndPoint](command:StepFuncTreeView.UpdateAwsEndPoint)"
+        "view": "GlueTreeView",
+        "contents": "Please click [+] to add your Glue Resources. \n [Add Glue Resource](command:GlueTreeView.AddGlueResource) \n Leave Resource name empty to get all your Glue resources. You can enter Resource name partially. \n If you can not connect after a while check your Aws Credentials, Network and Proxy settings. \n\n\n\n To Access Aws, you need to configure aws credentials. \n For more detail on Aws Credentials [Click Here](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html) \n For a Youtube Tutorial [Click Here](https://www.youtube.com/watch?v=SON8sY1iOBU) \n [Update Aws EndPoint](command:GlueTreeView.UpdateAwsEndPoint)"
       }
     ]
   },
@@ -469,10 +308,8 @@
     "@aws-sdk/client-cloudwatch-logs": "^3.948.0",
     "@aws-sdk/client-glue": "^3.964.0",
     "@aws-sdk/client-iam": "^3.948.0",
-    "@aws-sdk/client-sfn": "^3.948.0",
     "@aws-sdk/client-sts": "^3.948.0",
     "@aws-sdk/credential-providers": "^3.948.0",
-    "@tshepomgaga/aws-sfn-graph": "^0.0.6",
     "@vscode-elements/elements": "^2.3.1",
     "@vscode/codicons": "^0.0.43",
     "archiver": "^7.0.1",
