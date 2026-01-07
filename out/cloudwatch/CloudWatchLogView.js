@@ -227,7 +227,7 @@ class CloudWatchLogView {
         <table>
             <tr>
                 <td colspan="3">
-                    <a href="https://github.com/necatiarslan/aws-step-functions-vscode-extension/issues/new">Bug Report & Feature Request</a>
+                    <a href="https://github.com/necatiarslan/aws-glue-vscode-extension/issues/new">Bug Report & Feature Request</a>
                 </td>
             </tr>
         </table>

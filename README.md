@@ -1,17 +1,15 @@
-# Aws Step Functions Extension for VSCode
+# Aws Glue Extension for VSCode
 ![screenshoot](media/ext-main.png)
 
-🚀 **AWS Step Functions Extension for VSCode** allows you to interact with your AWS Step Functions directly within VSCode. This extension streamlines the development, testing, and debugging of Step Functions, providing an intuitive interface for triggering functions, viewing logs, and managing payloads—all within your favorite code editor.  
+🚀 **AWS Glue Extension for VSCode** allows you to interact with your AWS Glue resources directly within VSCode. This extension streamlines the development, testing, and monitoring of Glue Jobs, Crawlers, and Triggers, providing an intuitive interface for triggering resources, viewing logs, and managing your ETL workflows—all within your favorite code editor.  
 
 ## ✨ Features  
 
-- **Trigger Step Functions**: Run your AWS Step Functions with or without payloads.  
-- **Manage Payloads**: Save and reuse JSON payloads for testing.  
-- **View CloudWatch Logs**: Instantly access logs related to your Step Functions executions. 
-- **Upload Code**: Upload and update your Step Functions with ease.
-- **Export Logs**: Save logs for later analysis.  
-- **Filter and Search Logs**: Easily navigate through logs using built-in search and filter options.  
+- **Trigger Glue Jobs & Crawlers**: Run your AWS Glue Jobs and Crawlers with ease.  
+- **View CloudWatch Logs**: Instantly access logs related to your Glue Job and Crawler executions. 
+- **Manage Glue Resources**: Add and monitor Jobs, Crawlers, and Triggers.
 - **AWS Profile Support**: Work with multiple AWS profiles seamlessly.  
+- **Endpoint Customization**: Support for LocalStack and custom AWS endpoints.
 
 ## Sponsor Me
 If you find this extension useful, you can [sponsor me on GitHub](https://github.com/sponsors/necatiarslan).
@@ -54,16 +52,14 @@ Extension supports all types of credentials. It searches for aws credentials in 
 
 ## Bug Report
 To report your bugs or request new features, use link below\
-https://github.com/necatiarslan/aws-step-functions-vscode-extension/issues/new
+https://github.com/necatiarslan/aws-glue-vscode-extension/issues/new
 
 
 ## Todo  
-- show execution events 
-- fix graph view
-  - https://github.com/aws/aws-toolkit-vscode/tree/master/packages/core/src/stepFunctions/workflowStudio
-- add table view
-- add execution events view, state view
-- add execution input and output buttons to view
+- Add Database/Table support
+- Support for Script editing and upload
+- Better Job Run monitoring
+- Support for Workflow visualization
 
 ## Nice To Have
 - 

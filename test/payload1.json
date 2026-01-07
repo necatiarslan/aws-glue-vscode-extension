@@ -1,9 +1,0 @@
-{
-    "firstname": "John",
-    "lastname": "Doe",
-    "address": {
-        "street": "123 Main Street",
-        "city": "New York",
-        "state": "NY"
-    }
-}
