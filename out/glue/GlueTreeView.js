@@ -21,6 +21,7 @@ class GlueTreeView {
     ResourceList = [];
     JobRunsCache = {};
     LogStreamsCache = {};
+    JobInfoCache = {};
     constructor(context) {
         GlueTreeView.Current = this;
         this.context = context;
@@ -259,6 +260,22 @@ class GlueTreeView {
             this.JobRunsCache[node.Parent.ResourceName] = resultRuns.result;
             ui.logToOutput(`Fetched ${resultRuns.result.length} runs for ${node.Parent.ResourceName}`);
             this.treeDataProvider.Refresh();
+        });
+    }
+    async RefreshJobInfo(node) {
+        if (node.TreeItemType !== GlueTreeItem_1.TreeItemType.Info || !node.Parent)
+            return;
+        vscode.window.withProgress({
+            location: vscode.ProgressLocation.Window,
+            title: `Aws Glue: Loading Info for ${node.Parent.ResourceName}...`,
+        }, async (progress, token) => {
+            let result = await api.GetGlueJobDescription(node.Region, node.Parent.ResourceName);
+            if (!result.isSuccessful) {
+                ui.showErrorMessage('Get Job Info Error!', result.error);
+                return;
+            }
+            this.JobInfoCache[node.Parent.ResourceName] = result.result;
+            this.treeDataProvider.Refresh(node);
         });
     }
 }

@@ -9,7 +9,8 @@ export enum TreeItemType {
 	LogStream = "LogStream",
 	Run = "Run",
 	Detail = "Detail",
-	Arguments = "Arguments"
+	Arguments = "Arguments",
+	Info = "Info"
 }
 
 export class GlueTreeItem extends vscode.TreeItem {
@@ -57,6 +58,9 @@ export class GlueTreeItem extends vscode.TreeItem {
 				break;
 			case TreeItemType.Arguments:
 				iconName = "list-selection";
+				break;
+			case TreeItemType.Info:
+				iconName = "info";
 				break;
 		}
 

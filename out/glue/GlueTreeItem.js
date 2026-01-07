@@ -12,6 +12,7 @@ var TreeItemType;
     TreeItemType["Run"] = "Run";
     TreeItemType["Detail"] = "Detail";
     TreeItemType["Arguments"] = "Arguments";
+    TreeItemType["Info"] = "Info";
 })(TreeItemType || (exports.TreeItemType = TreeItemType = {}));
 class GlueTreeItem extends vscode.TreeItem {
     label;
@@ -62,6 +63,9 @@ class GlueTreeItem extends vscode.TreeItem {
                 break;
             case TreeItemType.Arguments:
                 iconName = "list-selection";
+                break;
+            case TreeItemType.Info:
+                iconName = "info";
                 break;
         }
         if (this.IsRunning) {

@@ -19,10 +19,27 @@ class GlueTreeDataProvider {
         if (element) {
             if (element.TreeItemType === GlueTreeItem_1.TreeItemType.Job) {
                 return [
+                    new GlueTreeItem_1.GlueTreeItem("Info", GlueTreeItem_1.TreeItemType.Info, element.Region, element.ResourceName, vscode.TreeItemCollapsibleState.Collapsed, undefined, element),
                     new GlueTreeItem_1.GlueTreeItem("Runs", GlueTreeItem_1.TreeItemType.RunGroup, element.Region, element.ResourceName, vscode.TreeItemCollapsibleState.Collapsed, undefined, element),
                     new GlueTreeItem_1.GlueTreeItem("/aws-glue/jobs/output", GlueTreeItem_1.TreeItemType.LogGroup, element.Region, element.ResourceName, vscode.TreeItemCollapsibleState.Collapsed, undefined, element),
                     new GlueTreeItem_1.GlueTreeItem("/aws-glue/jobs/error", GlueTreeItem_1.TreeItemType.LogGroup, element.Region, element.ResourceName, vscode.TreeItemCollapsibleState.Collapsed, undefined, element)
                 ];
+            }
+            if (element.TreeItemType === GlueTreeItem_1.TreeItemType.Info) {
+                let jobInfo = element.Payload || GlueTreeView_1.GlueTreeView.Current.JobInfoCache[element.ResourceName];
+                if (!jobInfo)
+                    return [new GlueTreeItem_1.GlueTreeItem("No Data (Refresh to Load)", GlueTreeItem_1.TreeItemType.Detail, element.Region, "", vscode.TreeItemCollapsibleState.None, undefined, element)];
+                let nodes = [];
+                for (let key in jobInfo) {
+                    let val = jobInfo[key];
+                    if (typeof val === 'object' && val !== null) {
+                        nodes.push(new GlueTreeItem_1.GlueTreeItem(`${key}: ...`, GlueTreeItem_1.TreeItemType.Info, element.Region, element.ResourceName, vscode.TreeItemCollapsibleState.Collapsed, undefined, element, val));
+                    }
+                    else {
+                        nodes.push(new GlueTreeItem_1.GlueTreeItem(`${key}: ${val}`, GlueTreeItem_1.TreeItemType.Detail, element.Region, "", vscode.TreeItemCollapsibleState.None, undefined, element));
+                    }
+                }
+                return nodes;
             }
             if (element.TreeItemType === GlueTreeItem_1.TreeItemType.RunGroup) {
                 // Runs will be added dynamically by RefreshRuns

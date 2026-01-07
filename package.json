@@ -18,7 +18,44 @@
   "keywords": [
     "AWS",
     "Glue",
-    "ETL"
+    "ETL",
+    "AWS Glue",
+    "AWS Glue Job",
+    "AWS Glue Job Monitor",
+    "AWS Glue Job Trigger",
+    "AWS Glue Job Update",
+    "AWS Glue Job Run",
+    "AWS Glue Job Log",
+    "AWS Glue Job Resource",
+    "AWS Glue Job Favorite",
+    "AWS Glue Job Hide",
+    "AWS Glue Job UnHide",
+    "AWS Glue Job Remove",
+    "AWS Glue Job Add",
+    "AWS Glue Job Goto",
+    "AWS Glue Job Select Aws Profile",
+    "AWS Glue Job Refresh",
+    "AWS Glue Job Filter",
+    "AWS Glue Job Show Only Favorite",
+    "AWS Glue Job Show Hidden Nodes",
+    "AWS Glue Job Add To Favorite",
+    "AWS Glue Job Delete From Favorite",
+    "AWS Glue Job Hide Node",
+    "AWS Glue Job UnHide Node",
+    "AWS Glue Job Remove Glue Job",
+    "AWS Glue Job Add Glue Job",
+    "AWS Glue Job Goto Aws Console",
+    "AWS Glue Job Select Aws Profile",
+    "AWS Glue Job Run Job",
+    "AWS Glue Job View Latest Log",
+    "AWS Glue Job Refresh Logs",
+    "AWS Glue Job Refresh Runs",
+    "AWS Glue Job View Log",
+    "AWS Glue Job Print Job Info",
+    "AWS Glue Job Test Aws Connection",
+    "AWS Glue Job Update Aws EndPoint",
+    "AWS Glue Job Donate",
+    "AWS Glue Job Bug And New Feature"
   ],
   "activationEvents": [],
   "main": "./out/extension.js",
@@ -111,8 +148,8 @@
       },
       {
         "command": "GlueTreeView.PrintResource",
-        "title": "Print Resource",
-        "icon": "$(debug-print)"
+        "title": "Print Job Info",
+        "icon": "$(info)"
       },
       {
         "command": "GlueTreeView.TestAwsConnection",
@@ -128,6 +165,11 @@
         "command": "GlueTreeView.Donate",
         "title": "Donate",
         "icon": "$(heart)"
+      },
+      {
+        "command": "GlueTreeView.RefreshJobInfo",
+        "title": "Refresh Info",
+        "icon": "$(refresh)"
       },
       {
         "command": "GlueTreeView.BugAndNewFeature",
@@ -245,6 +287,11 @@
           "group": "inline"
         },
         {
+          "command": "GlueTreeView.RefreshJobInfo",
+          "when": "view == GlueTreeView && viewItem == Info",
+          "group": "inline"
+        },
+        {
           "command": "GlueTreeView.ViewLog",
           "when": "view == GlueTreeView && viewItem == LogStream",
           "group": "inline"
@@ -272,7 +319,7 @@
     "viewsWelcome": [
       {
         "view": "GlueTreeView",
-        "contents": "Please click [+] to add your Glue Resources. \n [Add Glue Resource](command:GlueTreeView.AddGlueResource) \n Leave Resource name empty to get all your Glue resources. You can enter Resource name partially. \n If you can not connect after a while check your Aws Credentials, Network and Proxy settings. \n\n\n\n To Access Aws, you need to configure aws credentials. \n For more detail on Aws Credentials [Click Here](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html) \n For a Youtube Tutorial [Click Here](https://www.youtube.com/watch?v=SON8sY1iOBU) \n [Update Aws EndPoint](command:GlueTreeView.UpdateAwsEndPoint)"
+        "contents": "Please click [+] to add your Glue Jobs. \n [Add Glue Job](command:GlueTreeView.AddGlueJob) \n Leave Job name empty to get all your Glue Jobs. You can enter Job name partially. \n If you can not connect after a while check your Aws Credentials, Network and Proxy settings. \n\n\n\n To Access Aws, you need to configure aws credentials. \n For more detail on Aws Credentials [Click Here](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html) \n For a Youtube Tutorial [Click Here](https://www.youtube.com/watch?v=SON8sY1iOBU) \n [Update Aws EndPoint](command:GlueTreeView.UpdateAwsEndPoint)"
       }
     ]
   },

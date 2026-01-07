@@ -23,10 +23,26 @@ export class GlueTreeDataProvider implements vscode.TreeDataProvider<GlueTreeIte
 		if (element) {
 			if (element.TreeItemType === TreeItemType.Job) {
 				return [
+					new GlueTreeItem("Info", TreeItemType.Info, element.Region, element.ResourceName, vscode.TreeItemCollapsibleState.Collapsed, undefined, element),
 					new GlueTreeItem("Runs", TreeItemType.RunGroup, element.Region, element.ResourceName, vscode.TreeItemCollapsibleState.Collapsed, undefined, element),
 					new GlueTreeItem("/aws-glue/jobs/output", TreeItemType.LogGroup, element.Region, element.ResourceName, vscode.TreeItemCollapsibleState.Collapsed, undefined, element),
 					new GlueTreeItem("/aws-glue/jobs/error", TreeItemType.LogGroup, element.Region, element.ResourceName, vscode.TreeItemCollapsibleState.Collapsed, undefined, element)
 				];
+			}
+			if (element.TreeItemType === TreeItemType.Info) {
+				let jobInfo = element.Payload || GlueTreeView.Current.JobInfoCache[element.ResourceName];
+				if (!jobInfo) return [new GlueTreeItem("No Data (Refresh to Load)", TreeItemType.Detail, element.Region, "", vscode.TreeItemCollapsibleState.None, undefined, element)];
+				
+				let nodes: GlueTreeItem[] = [];
+				for (let key in jobInfo) {
+					let val = jobInfo[key];
+					if (typeof val === 'object' && val !== null) {
+						nodes.push(new GlueTreeItem(`${key}: ...`, TreeItemType.Info, element.Region, element.ResourceName, vscode.TreeItemCollapsibleState.Collapsed, undefined, element, val));
+					} else {
+						nodes.push(new GlueTreeItem(`${key}: ${val}`, TreeItemType.Detail, element.Region, "", vscode.TreeItemCollapsibleState.None, undefined, element));
+					}
+				}
+				return nodes;
 			}
 			if (element.TreeItemType === TreeItemType.RunGroup) {
 				// Runs will be added dynamically by RefreshRuns
@@ -114,6 +130,4 @@ export class GlueTreeDataProvider implements vscode.TreeDataProvider<GlueTreeIte
 		GlueTreeView.Current.ResourceList = GlueTreeView.Current.ResourceList.filter(r => !(r.Region === region && r.Name === name && r.Type === type));
 		this.Refresh();
 	}
-
-
 }
