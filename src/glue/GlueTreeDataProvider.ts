@@ -28,11 +28,6 @@ export class GlueTreeDataProvider implements vscode.TreeDataProvider<GlueTreeIte
 					new GlueTreeItem("/aws-glue/jobs/error", TreeItemType.LogGroup, element.Region, element.ResourceName, vscode.TreeItemCollapsibleState.Collapsed, undefined, element)
 				];
 			}
-			if (element.TreeItemType === TreeItemType.Crawler) {
-				return [
-					new GlueTreeItem("/aws-glue/crawlers", TreeItemType.LogGroup, element.Region, element.ResourceName, vscode.TreeItemCollapsibleState.Collapsed, undefined, element)
-				];
-			}
 			if (element.TreeItemType === TreeItemType.LogGroup) {
 				// Log streams will be added dynamically by RefreshLogStreams
 				return element.ResourceName.split('|').map(s => new GlueTreeItem(s, TreeItemType.LogStream, element.Region, s, vscode.TreeItemCollapsibleState.None, undefined, element)).filter(node => node.label !== element.ResourceName);

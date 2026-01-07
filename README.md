@@ -1,13 +1,13 @@
 # Aws Glue Extension for VSCode
 ![screenshoot](media/ext-main.png)
 
-🚀 **AWS Glue Extension for VSCode** allows you to interact with your AWS Glue resources directly within VSCode. This extension streamlines the development, testing, and monitoring of Glue Jobs, Crawlers, and Triggers, providing an intuitive interface for triggering resources, viewing logs, and managing your ETL workflows—all within your favorite code editor.  
+🚀 **AWS Glue Extension for VSCode** allows you to interact with your AWS Glue Jobs directly within VSCode. This extension streamlines the development, testing, and monitoring of Glue Jobs, providing an intuitive interface for triggering jobs, viewing logs, and managing your ETL workflows—all within your favorite code editor.  
 
 ## ✨ Features  
 
-- **Trigger Glue Jobs & Crawlers**: Run your AWS Glue Jobs and Crawlers with ease.  
-- **View CloudWatch Logs**: Instantly access logs related to your Glue Job and Crawler executions. 
-- **Manage Glue Resources**: Add and monitor Jobs, Crawlers, and Triggers.
+- **Trigger Glue Jobs**: Run your AWS Glue Jobs with ease.  
+- **View CloudWatch Logs**: Instantly access logs related to your Glue Job executions. 
+- **Manage Glue Jobs**: Add and monitor your Glue Jobs.
 - **AWS Profile Support**: Work with multiple AWS profiles seamlessly.  
 - **Endpoint Customization**: Support for LocalStack and custom AWS endpoints.
 

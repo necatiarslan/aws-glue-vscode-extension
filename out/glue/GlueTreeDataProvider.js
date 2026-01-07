@@ -24,11 +24,6 @@ class GlueTreeDataProvider {
                     new GlueTreeItem_1.GlueTreeItem("/aws-glue/jobs/error", GlueTreeItem_1.TreeItemType.LogGroup, element.Region, element.ResourceName, vscode.TreeItemCollapsibleState.Collapsed, undefined, element)
                 ];
             }
-            if (element.TreeItemType === GlueTreeItem_1.TreeItemType.Crawler) {
-                return [
-                    new GlueTreeItem_1.GlueTreeItem("/aws-glue/crawlers", GlueTreeItem_1.TreeItemType.LogGroup, element.Region, element.ResourceName, vscode.TreeItemCollapsibleState.Collapsed, undefined, element)
-                ];
-            }
             if (element.TreeItemType === GlueTreeItem_1.TreeItemType.LogGroup) {
                 // Log streams will be added dynamically by RefreshLogStreams
                 return element.ResourceName.split('|').map(s => new GlueTreeItem_1.GlueTreeItem(s, GlueTreeItem_1.TreeItemType.LogStream, element.Region, s, vscode.TreeItemCollapsibleState.None, undefined, element)).filter(node => node.label !== element.ResourceName);

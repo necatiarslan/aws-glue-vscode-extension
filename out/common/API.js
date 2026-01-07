@@ -3,11 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getConfigFilepath = exports.getCredentialsFilepath = exports.getHomeDir = exports.ENV_CREDENTIALS_PATH = void 0;
 exports.GetCredentials = GetCredentials;
 exports.GetGlueJobList = GetGlueJobList;
-exports.GetGlueCrawlerList = GetGlueCrawlerList;
-exports.GetGlueTriggerList = GetGlueTriggerList;
 exports.StartGlueJobRun = StartGlueJobRun;
-exports.StartGlueCrawler = StartGlueCrawler;
-exports.StartGlueTrigger = StartGlueTrigger;
 exports.GetLatestLogGroupLogStreamList = GetLatestLogGroupLogStreamList;
 exports.GetLogEvents = GetLogEvents;
 exports.TestAwsCredentials = TestAwsCredentials;
@@ -104,62 +100,6 @@ async function GetGlueJobList(region, filter) {
         return result;
     }
 }
-async function GetGlueCrawlerList(region, filter) {
-    let result = new MethodResult_1.MethodResult();
-    result.result = [];
-    try {
-        const glue = await GetGlueClient(region);
-        let nextToken = undefined;
-        do {
-            const cmd = new client_glue_1.GetCrawlersCommand({ MaxResults: 100, NextToken: nextToken });
-            const res = await glue.send(cmd);
-            if (res.Crawlers) {
-                for (const crawler of res.Crawlers) {
-                    if (!filter || crawler.Name?.includes(filter)) {
-                        result.result.push(crawler.Name ?? "");
-                    }
-                }
-            }
-            nextToken = res.NextToken;
-        } while (nextToken);
-        result.isSuccessful = true;
-        return result;
-    }
-    catch (error) {
-        result.isSuccessful = false;
-        result.error = error;
-        ui.logToOutput("api.GetGlueCrawlerList Error !!!", error);
-        return result;
-    }
-}
-async function GetGlueTriggerList(region, filter) {
-    let result = new MethodResult_1.MethodResult();
-    result.result = [];
-    try {
-        const glue = await GetGlueClient(region);
-        let nextToken = undefined;
-        do {
-            const cmd = new client_glue_1.GetTriggersCommand({ DependentJobName: undefined, NextToken: nextToken });
-            const res = await glue.send(cmd);
-            if (res.Triggers) {
-                for (const trigger of res.Triggers) {
-                    if (!filter || trigger.Name?.includes(filter)) {
-                        result.result.push(trigger.Name ?? "");
-                    }
-                }
-            }
-            nextToken = res.NextToken;
-        } while (nextToken);
-        result.isSuccessful = true;
-        return result;
-    }
-    catch (error) {
-        result.isSuccessful = false;
-        result.error = error;
-        ui.logToOutput("api.GetGlueTriggerList Error !!!", error);
-        return result;
-    }
-}
 async function StartGlueJobRun(region, jobName, parameters) {
     let result = new MethodResult_1.MethodResult();
     try {
@@ -174,40 +114,6 @@ async function StartGlueJobRun(region, jobName, parameters) {
         result.isSuccessful = false;
         result.error = error;
         ui.logToOutput("api.StartGlueJobRun Error !!!", error);
-        return result;
-    }
-}
-async function StartGlueCrawler(region, crawlerName) {
-    let result = new MethodResult_1.MethodResult();
-    try {
-        const glue = await GetGlueClient(region);
-        const cmd = new client_glue_1.StartCrawlerCommand({ Name: crawlerName });
-        await glue.send(cmd);
-        result.result = true;
-        result.isSuccessful = true;
-        return result;
-    }
-    catch (error) {
-        result.isSuccessful = false;
-        result.error = error;
-        ui.logToOutput("api.StartGlueCrawler Error !!!", error);
-        return result;
-    }
-}
-async function StartGlueTrigger(region, triggerName) {
-    let result = new MethodResult_1.MethodResult();
-    try {
-        const glue = await GetGlueClient(region);
-        const cmd = new client_glue_1.StartTriggerCommand({ Name: triggerName });
-        await glue.send(cmd);
-        result.result = true;
-        result.isSuccessful = true;
-        return result;
-    }
-    catch (error) {
-        result.isSuccessful = false;
-        result.error = error;
-        ui.logToOutput("api.StartGlueTrigger Error !!!", error);
         return result;
     }
 }

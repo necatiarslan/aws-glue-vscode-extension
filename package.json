@@ -1,7 +1,7 @@
 {
   "name": "aws-glue-vscode-extension",
   "displayName": "Aws Glue",
-  "description": "Update, Trigger & Monitor your Aws Glue Jobs, Crawlers and Triggers",
+  "description": "Update, Trigger & Monitor your Aws Glue Jobs",
   "version": "1.0.0",
   "publisher": "NecatiARSLAN",
   "repository": {
@@ -65,13 +65,13 @@
         "icon": "$(eye)"
       },
       {
-        "command": "GlueTreeView.AddGlueResource",
-        "title": "Add Glue Resource",
+        "command": "GlueTreeView.AddGlueJob",
+        "title": "Add Glue Job",
         "icon": "$(add)"
       },
       {
-        "command": "GlueTreeView.RemoveGlueResource",
-        "title": "Remove Glue Resource",
+        "command": "GlueTreeView.RemoveGlueJob",
+        "title": "Remove Glue Job",
         "icon": "$(trash)"
       },
       {
@@ -87,11 +87,6 @@
       {
         "command": "GlueTreeView.RunJob",
         "title": "Run Job",
-        "icon": "$(run)"
-      },
-      {
-        "command": "GlueTreeView.RunCrawler",
-        "title": "Run Crawler",
         "icon": "$(run)"
       },
       {
@@ -158,7 +153,7 @@
           "group": "navigation@3"
         },
         {
-          "command": "GlueTreeView.AddGlueResource",
+          "command": "GlueTreeView.AddGlueJob",
           "when": "view == GlueTreeView",
           "group": "navigation@4"
         },
@@ -196,32 +191,32 @@
       "view/item/context": [
         {
           "command": "GlueTreeView.AddToFav",
-          "when": "view == GlueTreeView && (viewItem == Job || viewItem == Crawler || viewItem == Trigger)",
+          "when": "view == GlueTreeView && viewItem == Job",
           "group": "Filter"
         },
         {
           "command": "GlueTreeView.DeleteFromFav",
-          "when": "view == GlueTreeView && (viewItem == Job || viewItem == Crawler || viewItem == Trigger)",
+          "when": "view == GlueTreeView && viewItem == Job",
           "group": "Filter"
         },
         {
           "command": "GlueTreeView.HideNode",
-          "when": "view == GlueTreeView && (viewItem == Job || viewItem == Crawler || viewItem == Trigger)",
+          "when": "view == GlueTreeView && viewItem == Job",
           "group": "Filter"
         },
         {
           "command": "GlueTreeView.UnHideNode",
-          "when": "view == GlueTreeView && (viewItem == Job || viewItem == Crawler || viewItem == Trigger)",
+          "when": "view == GlueTreeView && viewItem == Job",
           "group": "Filter"
         },
         {
-          "command": "GlueTreeView.RemoveGlueResource",
-          "when": "view == GlueTreeView && (viewItem == Job || viewItem == Crawler || viewItem == Trigger)",
+          "command": "GlueTreeView.RemoveGlueJob",
+          "when": "view == GlueTreeView && viewItem == Job",
           "group": "Glue"
         },
         {
           "command": "GlueTreeView.Goto",
-          "when": "view == GlueTreeView && (viewItem == Job || viewItem == Crawler || viewItem == Trigger)",
+          "when": "view == GlueTreeView && viewItem == Job",
           "group": "Glue"
         },
         {
@@ -230,18 +225,13 @@
           "group": "inline"
         },
         {
-          "command": "GlueTreeView.RunCrawler",
-          "when": "view == GlueTreeView && viewItem == Crawler",
-          "group": "inline"
-        },
-        {
           "command": "GlueTreeView.ViewLatestLog",
-          "when": "view == GlueTreeView && (viewItem == Job || viewItem == Crawler)",
+          "when": "view == GlueTreeView && viewItem == Job",
           "group": "inline"
         },
         {
           "command": "GlueTreeView.PrintResource",
-          "when": "view == GlueTreeView && (viewItem == Job || viewItem == Crawler || viewItem == Trigger)",
+          "when": "view == GlueTreeView && viewItem == Job",
           "group": "inline"
         },
         {

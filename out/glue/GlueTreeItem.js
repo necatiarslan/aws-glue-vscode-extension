@@ -6,8 +6,6 @@ const vscode = require("vscode");
 var TreeItemType;
 (function (TreeItemType) {
     TreeItemType["Job"] = "Job";
-    TreeItemType["Crawler"] = "Crawler";
-    TreeItemType["Trigger"] = "Trigger";
     TreeItemType["RunGroup"] = "RunGroup";
     TreeItemType["LogGroup"] = "LogGroup";
     TreeItemType["LogStream"] = "LogStream";
@@ -42,12 +40,6 @@ class GlueTreeItem extends vscode.TreeItem {
         switch (this.TreeItemType) {
             case TreeItemType.Job:
                 iconName = "settings-gear";
-                break;
-            case TreeItemType.Crawler:
-                iconName = "search";
-                break;
-            case TreeItemType.Trigger:
-                iconName = "zap";
                 break;
             case TreeItemType.RunGroup:
                 iconName = "history";

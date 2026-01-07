@@ -32,27 +32,29 @@ npm-install:
 list-cloudwatch-logs:
     aws --endpoint-url=http://localhost:4566 logs describe-log-groups
 
-create-glue-job:
+# https://docs.localstack.cloud/aws/services/glue/
+
+create:
     aws --endpoint-url=http://localhost:4566 glue create-job \
     --name job1 \
     --role arn:aws:iam::000000000000:role/glue-role \
     --command '{"Name": "pythonshell", "ScriptLocation": "s3://my-bucket/glue-test/job.py"}'
 
-list-glue-jobs:
+list:
     aws --endpoint-url=http://localhost:4566 glue list-jobs
 
-start-glue-job:
+start:
     aws --endpoint-url=http://localhost:4566 glue start-job-run --job-name job1
 
-stop-glue-job:
+stop:
     aws --endpoint-url=http://localhost:4566 glue stop-job-run --job-name job1
 
-get-glue-job:
+get:
     aws --endpoint-url=http://localhost:4566 glue get-job --job-name job1
 
-get-glue-job-run:
+get-run:
     aws --endpoint-url=http://localhost:4566 glue get-job-run --job-name job1 --job-run-id jr_3d9a474c51c77df0bb718c777b93e7aa5779451fa65ee076e8663b6b07d3a8f5
 
-get-glue-job-runs:
+get-runs:
     aws --endpoint-url=http://localhost:4566 glue get-job-runs --job-name job1
     

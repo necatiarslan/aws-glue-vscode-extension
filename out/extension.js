@@ -32,11 +32,11 @@ function activate(context) {
     vscode.commands.registerCommand('GlueTreeView.UnHideNode', (node) => {
         treeView.UnHideNode(node);
     });
-    vscode.commands.registerCommand('GlueTreeView.AddGlueResource', () => {
-        treeView.AddGlueResource();
+    vscode.commands.registerCommand('GlueTreeView.AddGlueJob', () => {
+        treeView.AddGlueJob();
     });
-    vscode.commands.registerCommand('GlueTreeView.RemoveGlueResource', (node) => {
-        treeView.RemoveGlueResource(node);
+    vscode.commands.registerCommand('GlueTreeView.RemoveGlueJob', (node) => {
+        treeView.RemoveGlueJob(node);
     });
     vscode.commands.registerCommand('GlueTreeView.Goto', (node) => {
         treeView.Goto(node);
@@ -58,9 +58,6 @@ function activate(context) {
     });
     vscode.commands.registerCommand('GlueTreeView.RunJob', (node) => {
         treeView.RunJob(node);
-    });
-    vscode.commands.registerCommand('GlueTreeView.RunCrawler', (node) => {
-        treeView.RunCrawler(node);
     });
     vscode.commands.registerCommand('GlueTreeView.ViewLatestLog', (node) => {
         treeView.ViewLatestLog(node);

@@ -128,34 +128,28 @@ export class GlueTreeView {
 		} catch (error) {}
 	}
 
-	async AddGlueResource(){
+	async AddGlueJob(){
 		let selectedRegion = await vscode.window.showInputBox({ placeHolder: 'Enter Region Eg: us-east-1', value: 'us-east-1' });
 		if(selectedRegion===undefined){ return; }
 
-		let type = await vscode.window.showQuickPick(['Job', 'Crawler', 'Trigger'], { placeHolder: 'Select Resource Type' });
-		if(!type) return;
-
-		let selectedName = await vscode.window.showInputBox({ placeHolder: 'Enter Resource Name / Search Text' });
+		let selectedName = await vscode.window.showInputBox({ placeHolder: 'Enter Job Name / Search Text' });
 		if(selectedName===undefined){ return; }
 
-		let result: any;
-		if(type === 'Job') result = await api.GetGlueJobList(selectedRegion, selectedName);
-		else if(type === 'Crawler') result = await api.GetGlueCrawlerList(selectedRegion, selectedName);
-		else if(type === 'Trigger') result = await api.GetGlueTriggerList(selectedRegion, selectedName);
+		let result = await api.GetGlueJobList(selectedRegion, selectedName);
 
 		if(!result.isSuccessful){ return; }
 
-		let selectedResourceList = await vscode.window.showQuickPick(result.result, {canPickMany:true, placeHolder: `Select Glue ${type}(s)`});
+		let selectedResourceList = await vscode.window.showQuickPick(result.result, {canPickMany:true, placeHolder: `Select Glue Job(s)`});
 		if(!selectedResourceList || selectedResourceList.length===0){ return; }
 
 		for(var name of selectedResourceList)
 		{
-			this.treeDataProvider.AddResource(selectedRegion, name, type);
+			this.treeDataProvider.AddResource(selectedRegion, name, 'Job');
 		}
 		this.SaveState();
 	}
 
-	async RemoveGlueResource(node: GlueTreeItem) {
+	async RemoveGlueJob(node: GlueTreeItem) {
 		this.treeDataProvider.RemoveResource(node.Region, node.ResourceName, node.TreeItemType);
 		this.SaveState();
 	}
@@ -182,31 +176,11 @@ export class GlueTreeView {
 		this.treeDataProvider.Refresh();
 	}
 
-	async RunCrawler(node: GlueTreeItem) {
-		if(node.IsRunning) { return;}
-		node.IsRunning = true;
-		this.treeDataProvider.Refresh();
-		
-		let result = await api.StartGlueCrawler(node.Region, node.ResourceName);
-		if(!result.isSuccessful)
-		{
-			ui.showErrorMessage('Run Crawler Error !!!', result.error);
-			node.IsRunning = false;
-			this.treeDataProvider.Refresh();
-			return;
-		}
-		ui.showInfoMessage('Crawler Started Successfully');
-		node.IsRunning = false;
-		this.treeDataProvider.Refresh();
-	}
-
 	async ViewLatestLog(node: GlueTreeItem) {
 		// Log group names for Glue are usually:
 		// Jobs: /aws-glue/jobs/output or /aws-glue/jobs/error
-		// Crawlers: /aws-glue/crawlers
 		let logGroupName = "";
 		if(node.TreeItemType === TreeItemType.Job) logGroupName = "/aws-glue/jobs/output";
-		else if(node.TreeItemType === TreeItemType.Crawler) logGroupName = "/aws-glue/crawlers";
 
 		if(!logGroupName) return;
 

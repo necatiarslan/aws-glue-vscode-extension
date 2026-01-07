@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { fromNodeProviderChain } from "@aws-sdk/credential-providers";
 import { fromIni } from "@aws-sdk/credential-provider-ini";
-import { GlueClient, GetJobsCommand, GetCrawlersCommand, GetTriggersCommand, StartJobRunCommand, StartCrawlerCommand, StartTriggerCommand, GetJobRunCommand, GetJobRunsCommand } from "@aws-sdk/client-glue";
+import { GlueClient, GetJobsCommand, StartJobRunCommand, GetJobRunCommand, GetJobRunsCommand } from "@aws-sdk/client-glue";
 import { CloudWatchLogsClient, OutputLogEvent, DescribeLogStreamsCommand, GetLogEventsCommand, DescribeLogGroupsCommand } from "@aws-sdk/client-cloudwatch-logs";
 import { STSClient, GetCallerIdentityCommand } from "@aws-sdk/client-sts";
 import * as ui from "./UI";
@@ -95,62 +95,6 @@ export async function GetGlueJobList(region: string, filter?: string): Promise<M
   }
 }
 
-export async function GetGlueCrawlerList(region: string, filter?: string): Promise<MethodResult<string[]>> {
-  let result: MethodResult<string[]> = new MethodResult<string[]>();
-  result.result = [];
-  try {
-    const glue = await GetGlueClient(region);
-    let nextToken: string | undefined = undefined;
-    do {
-      const cmd: GetCrawlersCommand = new GetCrawlersCommand({ MaxResults: 100, NextToken: nextToken });
-      const res = await glue.send(cmd);
-      if (res.Crawlers) {
-        for (const crawler of res.Crawlers) {
-          if (!filter || crawler.Name?.includes(filter)) {
-            result.result.push(crawler.Name ?? "");
-          }
-        }
-      }
-      nextToken = res.NextToken;
-    } while (nextToken);
-    result.isSuccessful = true;
-    return result;
-  } catch (error: any) {
-    result.isSuccessful = false;
-    result.error = error;
-    ui.logToOutput("api.GetGlueCrawlerList Error !!!", error);
-    return result;
-  }
-}
-
-export async function GetGlueTriggerList(region: string, filter?: string): Promise<MethodResult<string[]>> {
-  let result: MethodResult<string[]> = new MethodResult<string[]>();
-  result.result = [];
-  try {
-    const glue = await GetGlueClient(region);
-    let nextToken: string | undefined = undefined;
-    do {
-      const cmd: GetTriggersCommand = new GetTriggersCommand({ DependentJobName: undefined, NextToken: nextToken });
-      const res = await glue.send(cmd);
-      if (res.Triggers) {
-        for (const trigger of res.Triggers) {
-          if (!filter || trigger.Name?.includes(filter)) {
-            result.result.push(trigger.Name ?? "");
-          }
-        }
-      }
-      nextToken = res.NextToken;
-    } while (nextToken);
-    result.isSuccessful = true;
-    return result;
-  } catch (error: any) {
-    result.isSuccessful = false;
-    result.error = error;
-    ui.logToOutput("api.GetGlueTriggerList Error !!!", error);
-    return result;
-  }
-}
-
 export async function StartGlueJobRun(region: string, jobName: string, parameters?: any): Promise<MethodResult<string>> {
   let result: MethodResult<string> = new MethodResult<string>();
   try {
@@ -168,39 +112,6 @@ export async function StartGlueJobRun(region: string, jobName: string, parameter
   }
 }
 
-export async function StartGlueCrawler(region: string, crawlerName: string): Promise<MethodResult<boolean>> {
-  let result: MethodResult<boolean> = new MethodResult<boolean>();
-  try {
-    const glue = await GetGlueClient(region);
-    const cmd = new StartCrawlerCommand({ Name: crawlerName });
-    await glue.send(cmd);
-    result.result = true;
-    result.isSuccessful = true;
-    return result;
-  } catch (error: any) {
-    result.isSuccessful = false;
-    result.error = error;
-    ui.logToOutput("api.StartGlueCrawler Error !!!", error);
-    return result;
-  }
-}
-
-export async function StartGlueTrigger(region: string, triggerName: string): Promise<MethodResult<boolean>> {
-  let result: MethodResult<boolean> = new MethodResult<boolean>();
-  try {
-    const glue = await GetGlueClient(region);
-    const cmd = new StartTriggerCommand({ Name: triggerName });
-    await glue.send(cmd);
-    result.result = true;
-    result.isSuccessful = true;
-    return result;
-  } catch (error: any) {
-    result.isSuccessful = false;
-    result.error = error;
-    ui.logToOutput("api.StartGlueTrigger Error !!!", error);
-    return result;
-  }
-}
 
 export async function GetLatestLogGroupLogStreamList(Region: string, LogGroupName: string): Promise<MethodResult<string[]>> {
   let result: MethodResult<string[]> = new MethodResult<string[]>();

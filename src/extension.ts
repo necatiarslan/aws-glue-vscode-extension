@@ -40,12 +40,12 @@ export function activate(context: vscode.ExtensionContext) {
 		treeView.UnHideNode(node);
 	});
 
-	vscode.commands.registerCommand('GlueTreeView.AddGlueResource', () => {
-		treeView.AddGlueResource();
+	vscode.commands.registerCommand('GlueTreeView.AddGlueJob', () => {
+		treeView.AddGlueJob();
 	});
 
-	vscode.commands.registerCommand('GlueTreeView.RemoveGlueResource', (node: GlueTreeItem) => {
-		treeView.RemoveGlueResource(node);
+	vscode.commands.registerCommand('GlueTreeView.RemoveGlueJob', (node: GlueTreeItem) => {
+		treeView.RemoveGlueJob(node);
 	});
 
 	vscode.commands.registerCommand('GlueTreeView.Goto', (node: GlueTreeItem) => {
@@ -74,10 +74,6 @@ export function activate(context: vscode.ExtensionContext) {
 
 	vscode.commands.registerCommand('GlueTreeView.RunJob', (node: GlueTreeItem) => {
 		treeView.RunJob(node);
-	});
-
-	vscode.commands.registerCommand('GlueTreeView.RunCrawler', (node: GlueTreeItem) => {
-		treeView.RunCrawler(node);
 	});
 
 	vscode.commands.registerCommand('GlueTreeView.ViewLatestLog', (node: GlueTreeItem) => {
