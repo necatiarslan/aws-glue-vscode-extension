@@ -215,9 +215,18 @@ class GlueTreeView {
         ui.ShowTextDocument(jsonString, "json");
     }
     async ViewLog(node) {
-        if (node.TreeItemType !== GlueTreeItem_1.TreeItemType.LogStream || !node.Parent)
+        if (node.TreeItemType !== GlueTreeItem_1.TreeItemType.LogStream)
             return;
-        CloudWatchLogView_1.CloudWatchLogView.Render(this.context.extensionUri, node.Region, node.Parent.label, node.ResourceName);
+        let logGroupName = "";
+        if (node.Payload && node.Payload.LogGroupName) {
+            logGroupName = node.Payload.LogGroupName;
+        }
+        else if (node.Parent) {
+            logGroupName = node.Parent.label;
+        }
+        if (!logGroupName)
+            return;
+        CloudWatchLogView_1.CloudWatchLogView.Render(this.context.extensionUri, node.Region, logGroupName, node.ResourceName);
     }
     async RefreshLogStreams(node) {
         if (node.TreeItemType !== GlueTreeItem_1.TreeItemType.LogGroup)

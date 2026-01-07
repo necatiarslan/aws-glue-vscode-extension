@@ -227,8 +227,18 @@ export class GlueTreeView {
 	}
 
 	async ViewLog(node: GlueTreeItem) {
-		if(node.TreeItemType !== TreeItemType.LogStream || !node.Parent) return;
-		CloudWatchLogView.Render(this.context.extensionUri, node.Region, node.Parent.label!, node.ResourceName);
+		if(node.TreeItemType !== TreeItemType.LogStream) return;
+		
+		let logGroupName = "";
+		if (node.Payload && node.Payload.LogGroupName) {
+			logGroupName = node.Payload.LogGroupName;
+		} else if (node.Parent) {
+			logGroupName = node.Parent.label!;
+		}
+
+		if (!logGroupName) return;
+		
+		CloudWatchLogView.Render(this.context.extensionUri, node.Region, logGroupName, node.ResourceName);
 	}
 
 	async RefreshLogStreams(node: GlueTreeItem) {
