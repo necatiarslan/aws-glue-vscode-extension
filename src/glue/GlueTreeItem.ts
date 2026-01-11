@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import * as vscode from 'vscode';
-import { join } from 'path';
 
 export enum TreeItemType {
 	Job = "Job",

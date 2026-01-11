@@ -60,7 +60,7 @@ function activate(context) {
         treeView.RunJob(node);
     });
     vscode.commands.registerCommand('GlueTreeView.ViewLatestLog', (node) => {
-        treeView.ViewLatestLog(node);
+        // Deprecated
     });
     vscode.commands.registerCommand('GlueTreeView.PrintResource', async (node) => {
         await treeView.PrintResource(node);

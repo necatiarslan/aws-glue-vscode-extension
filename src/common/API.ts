@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { fromNodeProviderChain } from "@aws-sdk/credential-providers";
-import { fromIni } from "@aws-sdk/credential-provider-ini";
-import { GlueClient, GetJobsCommand, StartJobRunCommand, GetJobRunCommand, GetJobRunsCommand } from "@aws-sdk/client-glue";
+import { GlueClient, GetJobCommand, GetJobsCommand, StartJobRunCommand, GetJobRunCommand, GetJobRunsCommand } from "@aws-sdk/client-glue";
 import { CloudWatchLogsClient, OutputLogEvent, DescribeLogStreamsCommand, GetLogEventsCommand, DescribeLogGroupsCommand } from "@aws-sdk/client-cloudwatch-logs";
 import { STSClient, GetCallerIdentityCommand } from "@aws-sdk/client-sts";
 import * as ui from "./UI";
@@ -12,7 +11,6 @@ import { join, basename, extname, dirname } from "path";
 import { parseKnownFiles, SourceProfileInit } from "../aws-sdk/parseKnownFiles";
 import { ParsedIniData } from "@aws-sdk/types";
 import * as GlueTreeView from '../glue/GlueTreeView';
-import * as fs from 'fs';
 
 export async function GetCredentials() {
   let credentials;
@@ -254,9 +252,9 @@ export async function GetGlueJobDescription(region: string, jobName: string): Pr
   let result: MethodResult<any> = new MethodResult<any>();
   try {
     const glue = await GetGlueClient(region);
-    const cmd = new GetJobsCommand({ }); // Glue doesn't have a simple DescribeJob, GetJobs works
+    const cmd = new GetJobCommand({ JobName: jobName }); // Glue doesn't have a simple DescribeJob, GetJobs works
     const res = await glue.send(cmd);
-    const job = res.Jobs?.find(j => j.Name === jobName);
+    const job = res.Job || {};
     result.result = job;
     result.isSuccessful = true;
     return result;

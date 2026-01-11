@@ -265,9 +265,9 @@ async function GetGlueJobDescription(region, jobName) {
     let result = new MethodResult_1.MethodResult();
     try {
         const glue = await GetGlueClient(region);
-        const cmd = new client_glue_1.GetJobsCommand({}); // Glue doesn't have a simple DescribeJob, GetJobs works
+        const cmd = new client_glue_1.GetJobCommand({ JobName: jobName }); // Glue doesn't have a simple DescribeJob, GetJobs works
         const res = await glue.send(cmd);
-        const job = res.Jobs?.find(j => j.Name === jobName);
+        const job = res.Job || {};
         result.result = job;
         result.isSuccessful = true;
         return result;

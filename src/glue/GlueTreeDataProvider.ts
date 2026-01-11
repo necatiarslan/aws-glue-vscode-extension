@@ -2,7 +2,6 @@
 import * as vscode from 'vscode';
 import { GlueTreeItem, TreeItemType } from './GlueTreeItem';
 import { GlueTreeView } from './GlueTreeView';
-import * as api from '../common/API';
 
 export class GlueTreeDataProvider implements vscode.TreeDataProvider<GlueTreeItem> {
 
@@ -25,8 +24,6 @@ export class GlueTreeDataProvider implements vscode.TreeDataProvider<GlueTreeIte
 				return [
 					new GlueTreeItem("Info", TreeItemType.Info, element.Region, element.ResourceName, vscode.TreeItemCollapsibleState.Collapsed, undefined, element),
 					new GlueTreeItem("Runs", TreeItemType.RunGroup, element.Region, element.ResourceName, vscode.TreeItemCollapsibleState.Collapsed, undefined, element),
-					new GlueTreeItem("/aws-glue/jobs/output", TreeItemType.LogGroup, element.Region, element.ResourceName, vscode.TreeItemCollapsibleState.Collapsed, undefined, element),
-					new GlueTreeItem("/aws-glue/jobs/error", TreeItemType.LogGroup, element.Region, element.ResourceName, vscode.TreeItemCollapsibleState.Collapsed, undefined, element)
 				];
 			}
 			if (element.TreeItemType === TreeItemType.Info) {
@@ -55,7 +52,7 @@ export class GlueTreeDataProvider implements vscode.TreeDataProvider<GlueTreeIte
 				if (runs.length === 0) return [new GlueTreeItem("No Runs Found", TreeItemType.Detail, element.Region, "", vscode.TreeItemCollapsibleState.None, undefined, element)];
 				
 				return (runs as any[]).map(run => {
-					let runLabel = `${run.Id} (${run.JobRunState})`;
+					let runLabel = `${run.Id.substring(0, 10)} (${run.JobRunState})`;
 					return new GlueTreeItem(runLabel, TreeItemType.Run, element.Region, run.Id, vscode.TreeItemCollapsibleState.Collapsed, undefined, element, run);
 				});
 			}
@@ -73,11 +70,11 @@ export class GlueTreeDataProvider implements vscode.TreeDataProvider<GlueTreeIte
 				let children: GlueTreeItem[] = [];
 
 				// Log nodes
-				let outLog = new GlueTreeItem("View Output Logs", TreeItemType.LogStream, element.Region, run.Id, vscode.TreeItemCollapsibleState.None, undefined, element, { LogGroupName: "/aws-glue/jobs/output" });
+				let outLog = new GlueTreeItem("View Output Logs", TreeItemType.LogStream, element.Region, run.Id, vscode.TreeItemCollapsibleState.None, undefined, element, { LogGroupName: run.LogGroupName });
 				outLog.command = { command: 'GlueTreeView.ViewLog', title: 'View Log', arguments: [outLog] };
 				children.push(outLog);
 
-				let errLog = new GlueTreeItem("View Error Logs", TreeItemType.LogStream, element.Region, run.Id, vscode.TreeItemCollapsibleState.None, undefined, element, { LogGroupName: "/aws-glue/jobs/error" });
+				let errLog = new GlueTreeItem("View Error Logs", TreeItemType.LogStream, element.Region, run.Id, vscode.TreeItemCollapsibleState.None, undefined, element, { LogGroupName: run.ErrorLogGroupName });
 				errLog.command = { command: 'GlueTreeView.ViewLog', title: 'View Log', arguments: [errLog] };
 				children.push(errLog);
 

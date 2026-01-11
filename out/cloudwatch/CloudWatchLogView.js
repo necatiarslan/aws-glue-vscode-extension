@@ -82,6 +82,19 @@ class CloudWatchLogView {
     }
     static Render(extensionUri, Region, LogGroup, LogStream) {
         ui.logToOutput('CloudWatchLogView.Render Started');
+        ui.logToOutput(`Parameters: Region=${Region}, LogGroup=${LogGroup}, LogStream=${LogStream}`);
+        if (!Region || Region.length === 0) {
+            ui.showInfoMessage("Region is required to view logs.");
+            return;
+        }
+        if (!LogGroup || LogGroup.length === 0) {
+            ui.showInfoMessage("Log Group is required to view logs.");
+            return;
+        }
+        if (!LogStream || LogStream.length === 0) {
+            ui.showInfoMessage("Log Stream is required to view logs.");
+            return;
+        }
         if (CloudWatchLogView.Current) {
             CloudWatchLogView.Current.ResetCurrentState();
             CloudWatchLogView.Current.Region = Region;

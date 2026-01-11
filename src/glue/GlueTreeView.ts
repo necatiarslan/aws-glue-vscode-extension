@@ -179,24 +179,6 @@ export class GlueTreeView {
 		this.treeDataProvider.Refresh();
 	}
 
-	async ViewLatestLog(node: GlueTreeItem) {
-		// Log group names for Glue are usually:
-		// Jobs: /aws-glue/jobs/output or /aws-glue/jobs/error
-		let logGroupName = "";
-		if(node.TreeItemType === TreeItemType.Job) logGroupName = "/aws-glue/jobs/output";
-
-		if(!logGroupName) return;
-
-		let resultLogStream = await api.GetLatestLogGroupLogStreamList(node.Region, logGroupName);
-		if(!resultLogStream.isSuccessful || resultLogStream.result.length === 0)
-		{
-			ui.showErrorMessage('Get LogStream Error !!!', resultLogStream.error);
-			return;
-		}
-
-		CloudWatchLogView.Render(this.context.extensionUri, node.Region, logGroupName, resultLogStream.result[0]);
-	}
-
 	async SelectAwsProfile(node: GlueTreeItem) {
 		var result = await api.GetAwsProfileList();
 		if(!result.isSuccessful){ return; }

@@ -77,7 +77,7 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 
 	vscode.commands.registerCommand('GlueTreeView.ViewLatestLog', (node: GlueTreeItem) => {
-		treeView.ViewLatestLog(node);
+		// Deprecated
 	});
 
 	vscode.commands.registerCommand('GlueTreeView.PrintResource', async (node: GlueTreeItem) => {
