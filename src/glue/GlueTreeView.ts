@@ -275,4 +275,12 @@ export class GlueTreeView {
 			this.treeDataProvider.Refresh(node);
 		});
 	}
+
+	async ShowRunInfo(node: GlueTreeItem) {
+		if(node.TreeItemType !== TreeItemType.Run || !node.Payload) return;
+
+		let run = node.Payload;
+		let jsonString = JSON.stringify(run, null, 2);
+		ui.ShowTextDocument(jsonString, "json");
+	}
 }

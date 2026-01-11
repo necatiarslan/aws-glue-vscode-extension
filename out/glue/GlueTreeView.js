@@ -263,6 +263,13 @@ class GlueTreeView {
             this.treeDataProvider.Refresh(node);
         });
     }
+    async ShowRunInfo(node) {
+        if (node.TreeItemType !== GlueTreeItem_1.TreeItemType.Run || !node.Payload)
+            return;
+        let run = node.Payload;
+        let jsonString = JSON.stringify(run, null, 2);
+        ui.ShowTextDocument(jsonString, "json");
+    }
 }
 exports.GlueTreeView = GlueTreeView;
 //# sourceMappingURL=GlueTreeView.js.map

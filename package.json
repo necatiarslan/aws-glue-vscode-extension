@@ -172,6 +172,11 @@
         "icon": "$(refresh)"
       },
       {
+        "command": "GlueTreeView.ShowRunInfo",
+        "title": "Show Run Info",
+        "icon": "$(info)"
+      },
+      {
         "command": "GlueTreeView.BugAndNewFeature",
         "title": "Bug and New Feature",
         "icon": "$(issues)"
@@ -294,6 +299,11 @@
         {
           "command": "GlueTreeView.ViewLog",
           "when": "view == GlueTreeView && viewItem == LogStream",
+          "group": "inline"
+        },
+        {
+          "command": "GlueTreeView.ShowRunInfo",
+          "when": "view == GlueTreeView && viewItem == Run",
           "group": "inline"
         }
       ]

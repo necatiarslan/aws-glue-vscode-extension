@@ -77,6 +77,9 @@ function activate(context) {
     vscode.commands.registerCommand('GlueTreeView.RefreshJobInfo', async (node) => {
         await treeView.RefreshJobInfo(node);
     });
+    vscode.commands.registerCommand('GlueTreeView.ShowRunInfo', async (node) => {
+        await treeView.ShowRunInfo(node);
+    });
     ui.logToOutput('Aws Glue Extension activation completed');
 }
 function deactivate() {
