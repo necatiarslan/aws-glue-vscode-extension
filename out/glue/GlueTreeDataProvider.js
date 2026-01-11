@@ -51,6 +51,12 @@ class GlueTreeDataProvider {
                     return [new GlueTreeItem_1.GlueTreeItem("No Runs Found", GlueTreeItem_1.TreeItemType.Detail, element.Region, "", vscode.TreeItemCollapsibleState.None, undefined, element)];
                 return runs.map(run => {
                     let runLabel = `${run.Id.substring(0, 10)} (${run.JobRunState})`;
+                    if (run.StartedOn) {
+                        runLabel += ` - ${new Date(run.StartedOn).toLocaleString()}`;
+                    }
+                    if (run.ExecutionTime) {
+                        runLabel += ` (${run.ExecutionTime}s)`;
+                    }
                     return new GlueTreeItem_1.GlueTreeItem(runLabel, GlueTreeItem_1.TreeItemType.Run, element.Region, run.Id, vscode.TreeItemCollapsibleState.Collapsed, undefined, element, run);
                 });
             }
@@ -83,6 +89,7 @@ class GlueTreeDataProvider {
                 children.push(new GlueTreeItem_1.GlueTreeItem(`Status: ${run.JobRunState}`, GlueTreeItem_1.TreeItemType.Detail, element.Region, "", vscode.TreeItemCollapsibleState.None, undefined, element));
                 children.push(new GlueTreeItem_1.GlueTreeItem(`Started: ${run.StartedOn ? new Date(run.StartedOn).toLocaleString() : 'N/A'}`, GlueTreeItem_1.TreeItemType.Detail, element.Region, "", vscode.TreeItemCollapsibleState.None, undefined, element));
                 children.push(new GlueTreeItem_1.GlueTreeItem(`ExecutionTime: ${run.ExecutionTime}s`, GlueTreeItem_1.TreeItemType.Detail, element.Region, "", vscode.TreeItemCollapsibleState.None, undefined, element));
+                children.push(new GlueTreeItem_1.GlueTreeItem(`ErrorMessage: ${run.ErrorMessage || 'N/A'}`, GlueTreeItem_1.TreeItemType.Detail, element.Region, "", vscode.TreeItemCollapsibleState.None, undefined, element));
                 return children;
             }
             if (element.TreeItemType === GlueTreeItem_1.TreeItemType.Arguments) {

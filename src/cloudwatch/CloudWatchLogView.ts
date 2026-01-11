@@ -90,6 +90,7 @@ export class CloudWatchLogView {
         }
         else
         {
+            this.RenderHtml();
             this.StopTimer();
         }   
     }
