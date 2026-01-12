@@ -89,6 +89,9 @@ function activate(context) {
     vscode.commands.registerCommand('GlueTreeView.RefreshJobInfo', async (node) => {
         await treeView.RefreshJobInfo(node);
     });
+    vscode.commands.registerCommand('GlueTreeView.TriggerRun', async (node) => {
+        await treeView.TriggerRun(node);
+    });
     vscode.commands.registerCommand('GlueTreeView.ShowRunInfo', async (node) => {
         await treeView.ShowRunInfo(node);
     });

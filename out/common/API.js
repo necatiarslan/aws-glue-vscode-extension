@@ -4,6 +4,7 @@ exports.getConfigFilepath = exports.getCredentialsFilepath = exports.getHomeDir 
 exports.GetCredentials = GetCredentials;
 exports.GetGlueJobList = GetGlueJobList;
 exports.StartGlueJobRun = StartGlueJobRun;
+exports.RestartGlueJobRun = RestartGlueJobRun;
 exports.GetLatestLogGroupLogStreamList = GetLatestLogGroupLogStreamList;
 exports.GetLogEvents = GetLogEvents;
 exports.TestAwsCredentials = TestAwsCredentials;
@@ -127,6 +128,23 @@ async function StartGlueJobRun(region, jobName, parameters) {
         result.isSuccessful = false;
         result.error = error;
         ui.logToOutput("api.StartGlueJobRun Error !!!", error);
+        return result;
+    }
+}
+async function RestartGlueJobRun(region, jobName, jobRunId) {
+    let result = new MethodResult_1.MethodResult();
+    try {
+        const glue = await GetGlueClient(region);
+        const cmd = new client_glue_1.StartJobRunCommand({ JobName: jobName, JobRunId: jobRunId });
+        const res = await glue.send(cmd);
+        result.result = res.JobRunId ?? "";
+        result.isSuccessful = true;
+        return result;
+    }
+    catch (error) {
+        result.isSuccessful = false;
+        result.error = error;
+        ui.logToOutput("api.RestartGlueJobRun Error !!!", error);
         return result;
     }
 }

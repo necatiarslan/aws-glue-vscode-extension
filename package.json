@@ -162,6 +162,11 @@
         "icon": "$(refresh)"
       },
       {
+        "command": "GlueTreeView.TriggerRun",
+        "title": "Trigger Run",
+        "icon": "$(debug-restart)"
+      },
+      {
         "command": "GlueTreeView.ViewLog",
         "title": "View Log",
         "icon": "$(output)"
@@ -309,6 +314,11 @@
         {
           "command": "GlueTreeView.RefreshRuns",
           "when": "view == GlueTreeView && viewItem == RunGroup",
+          "group": "inline"
+        },
+        {
+          "command": "GlueTreeView.TriggerRun",
+          "when": "view == GlueTreeView && viewItem == Run",
           "group": "inline"
         },
         {

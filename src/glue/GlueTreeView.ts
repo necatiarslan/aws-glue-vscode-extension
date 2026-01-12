@@ -366,6 +366,29 @@ export class GlueTreeView {
 		}
 	}
 
+	async TriggerRun(node: GlueTreeItem) {
+		if (node.TreeItemType !== TreeItemType.Run) { return; }
+
+		const jobName = node.Parent?.Parent?.ResourceName;
+		const jobRunId = node.ResourceName;
+		if (!jobName || !jobRunId) {
+			ui.showInfoMessage('Unable to restart run: missing job or run id');
+			return;
+		}
+
+		try {
+			ui.logToOutput(`Restarting Glue job run ${jobRunId} for job ${jobName}`);
+			const result = await api.RestartGlueJobRun(node.Region, jobName, jobRunId);
+			if (!result.isSuccessful) {
+				ui.showErrorMessage('Restart job run failed', result.error);
+				return;
+			}
+			ui.showInfoMessage(`Restarted job run. New run id: ${result.result}`);
+		} catch (error: any) {
+			ui.showErrorMessage('Restart job run error', error);
+		}
+	}
+
 	async ShowRunInfo(node: GlueTreeItem) {
 		if(node.TreeItemType !== TreeItemType.Run || !node.Payload) return;
 

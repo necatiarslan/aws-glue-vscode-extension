@@ -122,6 +122,23 @@ export async function StartGlueJobRun(region: string, jobName: string, parameter
   }
 }
 
+export async function RestartGlueJobRun(region: string, jobName: string, jobRunId: string): Promise<MethodResult<string>> {
+  let result: MethodResult<string> = new MethodResult<string>();
+  try {
+    const glue = await GetGlueClient(region);
+    const cmd = new StartJobRunCommand({ JobName: jobName, JobRunId: jobRunId });
+    const res = await glue.send(cmd);
+    result.result = res.JobRunId ?? "";
+    result.isSuccessful = true;
+    return result;
+  } catch (error: any) {
+    result.isSuccessful = false;
+    result.error = error;
+    ui.logToOutput("api.RestartGlueJobRun Error !!!", error);
+    return result;
+  }
+}
+
 
 export async function GetLatestLogGroupLogStreamList(Region: string, LogGroupName: string): Promise<MethodResult<string[]>> {
   let result: MethodResult<string[]> = new MethodResult<string[]>();

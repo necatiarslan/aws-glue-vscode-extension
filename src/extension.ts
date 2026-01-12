@@ -116,6 +116,10 @@ export function activate(context: vscode.ExtensionContext) {
 		await treeView.RefreshJobInfo(node);
 	});
 
+	vscode.commands.registerCommand('GlueTreeView.TriggerRun', async (node: GlueTreeItem) => {
+		await treeView.TriggerRun(node);
+	});
+
 	vscode.commands.registerCommand('GlueTreeView.ShowRunInfo', async (node: GlueTreeItem) => {
 		await treeView.ShowRunInfo(node);
 	});
