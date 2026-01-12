@@ -10,7 +10,10 @@ export enum TreeItemType {
 	Detail = "Detail",
 	Arguments = "Arguments",
 	Info = "Info",
-	Code = "Code"
+	Code = "Code",
+	Trigger = "Trigger",
+	TriggerWithPayload = "TriggerWithPayload",
+	TriggerWithoutPayload = "TriggerWithoutPayload"
 }
 
 export class GlueTreeItem extends vscode.TreeItem {
@@ -38,6 +41,15 @@ export class GlueTreeItem extends vscode.TreeItem {
 	setIcons() {
 		let iconName = "";
 		switch (this.TreeItemType) {
+			case TreeItemType.Trigger:
+				iconName = "zap";
+				break;
+			case TreeItemType.TriggerWithPayload:
+				iconName = "debug-start";
+				break;
+			case TreeItemType.TriggerWithoutPayload:
+				iconName = "debug-run";
+				break;
 			case TreeItemType.Code:
 				iconName = "file-code";
 				break;

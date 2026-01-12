@@ -23,6 +23,7 @@ export class GlueTreeDataProvider implements vscode.TreeDataProvider<GlueTreeIte
 			if (element.TreeItemType === TreeItemType.Job) {
 				return [
 					new GlueTreeItem("Code", TreeItemType.Code, element.Region, element.ResourceName, vscode.TreeItemCollapsibleState.Collapsed, undefined, element),
+					new GlueTreeItem("Trigger", TreeItemType.Trigger, element.Region, element.ResourceName, vscode.TreeItemCollapsibleState.Collapsed, undefined, element),
 					new GlueTreeItem("Info", TreeItemType.Info, element.Region, element.ResourceName, vscode.TreeItemCollapsibleState.Collapsed, undefined, element),
 					new GlueTreeItem("Runs", TreeItemType.RunGroup, element.Region, element.ResourceName, vscode.TreeItemCollapsibleState.Collapsed, undefined, element),
 				];
@@ -33,6 +34,12 @@ export class GlueTreeDataProvider implements vscode.TreeDataProvider<GlueTreeIte
 				return [new GlueTreeItem(codePath, TreeItemType.Detail, element.Region, "", vscode.TreeItemCollapsibleState.None, undefined, element)];
 			}
 			return [];
+		}
+		if (element.TreeItemType === TreeItemType.Trigger) {
+			return [
+				new GlueTreeItem("With Payload", TreeItemType.TriggerWithPayload, element.Region, element.ResourceName, vscode.TreeItemCollapsibleState.None, { command: 'GlueTreeView.TriggerWithPayload', title: 'Trigger With Payload', arguments: [element] }, element),
+				new GlueTreeItem("Without Payload", TreeItemType.TriggerWithoutPayload, element.Region, element.ResourceName, vscode.TreeItemCollapsibleState.None, { command: 'GlueTreeView.TriggerWithoutPayload', title: 'Trigger Without Payload', arguments: [element] }, element),
+			];
 		}
 			if (element.TreeItemType === TreeItemType.Info) {
 				let jobInfo = element.Payload || GlueTreeView.Current.JobInfoCache[element.ResourceName];

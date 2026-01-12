@@ -412,6 +412,66 @@ class GlueTreeView {
             ui.showErrorMessage('Unset job code error', error);
         }
     }
+    async TriggerWithPayload(node) {
+        if (node.TreeItemType !== GlueTreeItem_1.TreeItemType.TriggerWithPayload) {
+            return;
+        }
+        const jobName = node.Parent?.ResourceName;
+        if (!jobName) {
+            ui.showErrorMessage('Unable to start run: missing job name', new Error('missing job name'));
+            return;
+        }
+        const payloadText = await vscode.window.showInputBox({
+            prompt: 'Enter JSON payload for job run Arguments',
+            placeHolder: '{"--key":"value"}',
+            value: '{}'
+        });
+        if (payloadText === undefined) {
+            return;
+        }
+        let args = undefined;
+        try {
+            args = payloadText ? JSON.parse(payloadText) : undefined;
+        }
+        catch (err) {
+            ui.showErrorMessage('Invalid JSON payload', err);
+            return;
+        }
+        try {
+            ui.logToOutput(`Starting Glue job ${jobName} with payload`);
+            const result = await api.StartGlueJobRun(node.Region, jobName, args);
+            if (!result.isSuccessful) {
+                ui.showErrorMessage('Start job run failed', result.error);
+                return;
+            }
+            ui.showInfoMessage(`Job run started. Run id: ${result.result}`);
+        }
+        catch (error) {
+            ui.showErrorMessage('Start job run error', error);
+        }
+    }
+    async TriggerWithoutPayload(node) {
+        if (node.TreeItemType !== GlueTreeItem_1.TreeItemType.TriggerWithoutPayload) {
+            return;
+        }
+        const jobName = node.Parent?.ResourceName;
+        if (!jobName) {
+            ui.showErrorMessage('Unable to start run: missing job name', new Error('missing job name'));
+            return;
+        }
+        try {
+            ui.logToOutput(`Starting Glue job ${jobName} without payload`);
+            const result = await api.StartGlueJobRun(node.Region, jobName);
+            if (!result.isSuccessful) {
+                ui.showErrorMessage('Start job run failed', result.error);
+                return;
+            }
+            ui.showInfoMessage(`Job run started. Run id: ${result.result}`);
+        }
+        catch (error) {
+            ui.showErrorMessage('Start job run error', error);
+        }
+    }
 }
 exports.GlueTreeView = GlueTreeView;
 //# sourceMappingURL=GlueTreeView.js.map

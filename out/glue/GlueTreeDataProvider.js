@@ -20,6 +20,7 @@ class GlueTreeDataProvider {
             if (element.TreeItemType === GlueTreeItem_1.TreeItemType.Job) {
                 return [
                     new GlueTreeItem_1.GlueTreeItem("Code", GlueTreeItem_1.TreeItemType.Code, element.Region, element.ResourceName, vscode.TreeItemCollapsibleState.Collapsed, undefined, element),
+                    new GlueTreeItem_1.GlueTreeItem("Trigger", GlueTreeItem_1.TreeItemType.Trigger, element.Region, element.ResourceName, vscode.TreeItemCollapsibleState.Collapsed, undefined, element),
                     new GlueTreeItem_1.GlueTreeItem("Info", GlueTreeItem_1.TreeItemType.Info, element.Region, element.ResourceName, vscode.TreeItemCollapsibleState.Collapsed, undefined, element),
                     new GlueTreeItem_1.GlueTreeItem("Runs", GlueTreeItem_1.TreeItemType.RunGroup, element.Region, element.ResourceName, vscode.TreeItemCollapsibleState.Collapsed, undefined, element),
                 ];
@@ -30,6 +31,12 @@ class GlueTreeDataProvider {
                     return [new GlueTreeItem_1.GlueTreeItem(codePath, GlueTreeItem_1.TreeItemType.Detail, element.Region, "", vscode.TreeItemCollapsibleState.None, undefined, element)];
                 }
                 return [];
+            }
+            if (element.TreeItemType === GlueTreeItem_1.TreeItemType.Trigger) {
+                return [
+                    new GlueTreeItem_1.GlueTreeItem("With Payload", GlueTreeItem_1.TreeItemType.TriggerWithPayload, element.Region, element.ResourceName, vscode.TreeItemCollapsibleState.None, { command: 'GlueTreeView.TriggerWithPayload', title: 'Trigger With Payload', arguments: [element] }, element),
+                    new GlueTreeItem_1.GlueTreeItem("Without Payload", GlueTreeItem_1.TreeItemType.TriggerWithoutPayload, element.Region, element.ResourceName, vscode.TreeItemCollapsibleState.None, { command: 'GlueTreeView.TriggerWithoutPayload', title: 'Trigger Without Payload', arguments: [element] }, element),
+                ];
             }
             if (element.TreeItemType === GlueTreeItem_1.TreeItemType.Info) {
                 let jobInfo = element.Payload || GlueTreeView_1.GlueTreeView.Current.JobInfoCache[element.ResourceName];
