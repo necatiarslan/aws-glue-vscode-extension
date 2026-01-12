@@ -98,6 +98,12 @@ function activate(context) {
     vscode.commands.registerCommand('GlueTreeView.TriggerWithoutPayload', async (node) => {
         await treeView.TriggerWithoutPayload(node);
     });
+    vscode.commands.registerCommand('GlueTreeView.AddTriggerFile', async (node) => {
+        await treeView.AddTriggerFile(node);
+    });
+    vscode.commands.registerCommand('GlueTreeView.TriggerFromFile', async (node) => {
+        await treeView.TriggerFromFile(node);
+    });
     vscode.commands.registerCommand('GlueTreeView.ShowRunInfo', async (node) => {
         await treeView.ShowRunInfo(node);
     });

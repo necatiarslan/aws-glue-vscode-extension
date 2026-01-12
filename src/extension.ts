@@ -128,6 +128,14 @@ export function activate(context: vscode.ExtensionContext) {
 		await treeView.TriggerWithoutPayload(node);
 	});
 
+	vscode.commands.registerCommand('GlueTreeView.AddTriggerFile', async (node: GlueTreeItem) => {
+		await treeView.AddTriggerFile(node);
+	});
+
+	vscode.commands.registerCommand('GlueTreeView.TriggerFromFile', async (node: GlueTreeItem) => {
+		await treeView.TriggerFromFile(node);
+	});
+
 	vscode.commands.registerCommand('GlueTreeView.ShowRunInfo', async (node: GlueTreeItem) => {
 		await treeView.ShowRunInfo(node);
 	});

@@ -24,6 +24,7 @@ export class GlueTreeView {
 	public LogStreamsCache: {[key: string]: string[]} = {};
 	public JobInfoCache: {[key: string]: any} = {};
 	public JobCodePaths: {[key: string]: string} = {};
+	public JobTriggerFiles: {[key: string]: string[]} = {};
 
 	constructor(context: vscode.ExtensionContext) {
 		GlueTreeView.Current = this;
@@ -121,6 +122,7 @@ export class GlueTreeView {
 			this.context.globalState.update('ResourceList', this.ResourceList);
 			this.context.globalState.update('AwsEndPoint', this.AwsEndPoint);
 			this.context.globalState.update('JobCodePaths', this.JobCodePaths);
+			this.context.globalState.update('JobTriggerFiles', this.JobTriggerFiles);
 		} catch (error) {}
 	}
 
@@ -133,6 +135,7 @@ export class GlueTreeView {
 			this.isShowHiddenNodes = this.context.globalState.get('ShowHiddenNodes') || false;
 			this.ResourceList = this.context.globalState.get('ResourceList') || [];
 			this.JobCodePaths = this.context.globalState.get('JobCodePaths') || {};
+			this.JobTriggerFiles = this.context.globalState.get('JobTriggerFiles') || {};
 		} catch (error) {}
 	}
 
@@ -455,7 +458,6 @@ export class GlueTreeView {
 			ui.showErrorMessage('Start job run error', error);
 		}
 	}
-
 	async TriggerWithoutPayload(node: GlueTreeItem) {
 		if (node.TreeItemType !== TreeItemType.TriggerWithoutPayload) { return; }
 
@@ -477,4 +479,47 @@ export class GlueTreeView {
 			ui.showErrorMessage('Start job run error', error);
 		}
 	}
+async AddTriggerFile(node: GlueTreeItem) {
+	if (node.TreeItemType !== TreeItemType.Trigger) { return; }
+
+	try {
+		const fileUris = await vscode.window.showOpenDialog({
+			canSelectMany: false,
+			openLabel: 'Select Trigger File',
+			filters: { 'JSON': ['json'] }
+		});
+		if (!fileUris || fileUris.length === 0) { return; }
+
+		const filePath = fileUris[0].fsPath;
+		const jobName = node.ResourceName;
+		if (!this.JobTriggerFiles[jobName]) {
+			this.JobTriggerFiles[jobName] = [];
+		}
+		if (!this.JobTriggerFiles[jobName].includes(filePath)) {
+			this.JobTriggerFiles[jobName].push(filePath);
+			this.SaveState();
+			this.treeDataProvider.Refresh();
+			ui.showInfoMessage(`Trigger file added: ${filePath}`);
+		} else {
+			ui.showInfoMessage('Trigger file already added');
+		}
+	} catch (error: any) {
+		ui.showErrorMessage('Add trigger file error', error);
+	}
+}
+
+async RemoveTriggerFile(jobName: string, filePath: string) {
+	if (this.JobTriggerFiles[jobName]) {
+		this.JobTriggerFiles[jobName] = this.JobTriggerFiles[jobName].filter(f => f !== filePath);
+		if (this.JobTriggerFiles[jobName].length === 0) {
+			delete this.JobTriggerFiles[jobName];
+		}
+		this.SaveState();
+		this.treeDataProvider.Refresh();
+	}
+}
+
+async TriggerFromFile(node: GlueTreeItem) {
+	JobRunView.Render(this.context.extensionUri, node.Region, node.ResourceName, node.Payload?.filePath);
+}
 }

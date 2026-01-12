@@ -177,6 +177,16 @@
         "icon": "$(debug-run)"
       },
       {
+        "command": "GlueTreeView.AddTriggerFile",
+        "title": "Add Trigger File",
+        "icon": "$(plus)"
+      },
+      {
+        "command": "GlueTreeView.TriggerFromFile",
+        "title": "Trigger From File",
+        "icon": "$(debug-start)"
+      },
+      {
         "command": "GlueTreeView.ViewLog",
         "title": "View Log",
         "icon": "$(output)"
@@ -339,6 +349,16 @@
         {
           "command": "GlueTreeView.TriggerWithoutPayload",
           "when": "view == GlueTreeView && viewItem == TriggerWithoutPayload",
+          "group": "inline"
+        },
+        {
+          "command": "GlueTreeView.AddTriggerFile",
+          "when": "view == GlueTreeView && viewItem == Trigger",
+          "group": "inline"
+        },
+        {
+          "command": "GlueTreeView.TriggerFromFile",
+          "when": "view == GlueTreeView && viewItem == TriggerFile",
           "group": "inline"
         },
         {

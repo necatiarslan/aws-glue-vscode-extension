@@ -17,6 +17,7 @@ var TreeItemType;
     TreeItemType["Trigger"] = "Trigger";
     TreeItemType["TriggerWithPayload"] = "TriggerWithPayload";
     TreeItemType["TriggerWithoutPayload"] = "TriggerWithoutPayload";
+    TreeItemType["TriggerFile"] = "TriggerFile";
 })(TreeItemType || (exports.TreeItemType = TreeItemType = {}));
 class GlueTreeItem extends vscode.TreeItem {
     label;
@@ -55,6 +56,9 @@ class GlueTreeItem extends vscode.TreeItem {
                 break;
             case TreeItemType.TriggerWithoutPayload:
                 iconName = "debug-run";
+                break;
+            case TreeItemType.TriggerFile:
+                iconName = "file";
                 break;
             case TreeItemType.Code:
                 iconName = "file-code";

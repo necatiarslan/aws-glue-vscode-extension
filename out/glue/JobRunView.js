@@ -12,9 +12,11 @@ class JobRunView {
     disposables = [];
     extensionUri;
     state;
-    constructor(panel, extensionUri, region, jobName) {
+    triggerFilePath;
+    constructor(panel, extensionUri, region, jobName, triggerFilePath) {
         this.panel = panel;
         this.extensionUri = extensionUri;
+        this.triggerFilePath = triggerFilePath;
         this.state = {
             region,
             jobName,
@@ -26,11 +28,12 @@ class JobRunView {
         this.loadDefaultArgs();
         this.render();
     }
-    static Render(extensionUri, region, jobName) {
-        ui.logToOutput(`JobRunView.Render ${jobName} @ ${region}`);
+    static Render(extensionUri, region, jobName, triggerFilePath) {
+        ui.logToOutput(`JobRunView.Render ${jobName} @ ${region}` + (triggerFilePath ? ` with file: ${triggerFilePath}` : ''));
         if (JobRunView.Current) {
             JobRunView.Current.state.region = region;
             JobRunView.Current.state.jobName = jobName;
+            JobRunView.Current.triggerFilePath = triggerFilePath;
             JobRunView.Current.loadDefaultArgs();
             JobRunView.Current.render();
             return;
@@ -38,18 +41,25 @@ class JobRunView {
         const panel = vscode.window.createWebviewPanel("JobRunView", `Job: ${jobName}`, vscode.ViewColumn.One, {
             enableScripts: true,
         });
-        JobRunView.Current = new JobRunView(panel, extensionUri, region, jobName);
+        JobRunView.Current = new JobRunView(panel, extensionUri, region, jobName, triggerFilePath);
     }
     async loadDefaultArgs() {
         try {
             const res = await api.GetGlueJobDescription(this.state.region, this.state.jobName);
             if (!res.isSuccessful || !res.result) {
                 this.state.args = [];
+                if (this.triggerFilePath) {
+                    await this.loadTriggerFileArgs();
+                }
                 this.render();
                 return;
             }
             const defaults = res.result.Command?.DefaultArguments || {};
-            const args = Object.keys(defaults).map(k => ({ key: k, value: String(defaults[k]), enabled: false, isDefault: true }));
+            let args = Object.keys(defaults).map(k => ({ key: k, value: String(defaults[k]), enabled: false, isDefault: true }));
+            // If trigger file is provided, load args from file
+            if (this.triggerFilePath) {
+                args = await this.loadArgsFromTriggerFile(this.triggerFilePath) || args;
+            }
             this.state.args = args;
             this.render();
         }
@@ -58,6 +68,27 @@ class JobRunView {
             this.state.args = [];
             this.render();
         }
+    }
+    async loadTriggerFileArgs() {
+        if (!this.triggerFilePath) {
+            return;
+        }
+        this.state.args = await this.loadArgsFromTriggerFile(this.triggerFilePath) || [];
+    }
+    async loadArgsFromTriggerFile(filePath) {
+        try {
+            const fileUri = vscode.Uri.file(filePath);
+            const content = await vscode.workspace.fs.readFile(fileUri);
+            const text = new TextDecoder().decode(content);
+            const json = JSON.parse(text);
+            if (typeof json === 'object' && json !== null) {
+                return Object.keys(json).map(k => ({ key: k, value: String(json[k]), enabled: true }));
+            }
+        }
+        catch (err) {
+            ui.logToOutput("JobRunView.loadArgsFromTriggerFile error", err);
+        }
+        return undefined;
     }
     render() {
         this.panel.webview.html = this.getHtml(this.panel.webview, this.extensionUri);

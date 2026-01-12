@@ -36,10 +36,15 @@ export class GlueTreeDataProvider implements vscode.TreeDataProvider<GlueTreeIte
 			return [];
 		}
 		if (element.TreeItemType === TreeItemType.Trigger) {
-			return [
+			const triggerFiles = GlueTreeView.Current.JobTriggerFiles[element.ResourceName] || [];
+			const children: GlueTreeItem[] = [
 				new GlueTreeItem("With Payload", TreeItemType.TriggerWithPayload, element.Region, element.ResourceName, vscode.TreeItemCollapsibleState.None, { command: 'GlueTreeView.TriggerWithPayload', title: 'Trigger With Payload', arguments: [element] }, element),
 				new GlueTreeItem("Without Payload", TreeItemType.TriggerWithoutPayload, element.Region, element.ResourceName, vscode.TreeItemCollapsibleState.None, { command: 'GlueTreeView.TriggerWithoutPayload', title: 'Trigger Without Payload', arguments: [element] }, element),
 			];
+			for (const filePath of triggerFiles) {
+				children.push(new GlueTreeItem(filePath, TreeItemType.TriggerFile, element.Region, element.ResourceName, vscode.TreeItemCollapsibleState.None, { command: 'GlueTreeView.TriggerFromFile', title: 'Trigger From File', arguments: [{ jobName: element.ResourceName, region: element.Region, filePath }] }, element, { filePath }));
+			}
+			return children;
 		}
 			if (element.TreeItemType === TreeItemType.Info) {
 				let jobInfo = element.Payload || GlueTreeView.Current.JobInfoCache[element.ResourceName];

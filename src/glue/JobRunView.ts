@@ -28,10 +28,12 @@ export class JobRunView {
     private extensionUri: vscode.Uri;
 
     private state: JobRunViewState;
+    private triggerFilePath?: string;
 
-    private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, region: string, jobName: string) {
+    private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, region: string, jobName: string, triggerFilePath?: string) {
         this.panel = panel;
         this.extensionUri = extensionUri;
+        this.triggerFilePath = triggerFilePath;
         this.state = {
             region,
             jobName,
@@ -45,11 +47,12 @@ export class JobRunView {
         this.render();
     }
 
-    public static Render(extensionUri: vscode.Uri, region: string, jobName: string) {
-        ui.logToOutput(`JobRunView.Render ${jobName} @ ${region}`);
+    public static Render(extensionUri: vscode.Uri, region: string, jobName: string, triggerFilePath?: string) {
+        ui.logToOutput(`JobRunView.Render ${jobName} @ ${region}` + (triggerFilePath ? ` with file: ${triggerFilePath}` : ''));
         if (JobRunView.Current) {
             JobRunView.Current.state.region = region;
             JobRunView.Current.state.jobName = jobName;
+            JobRunView.Current.triggerFilePath = triggerFilePath;
             JobRunView.Current.loadDefaultArgs();
             JobRunView.Current.render();
             return;
@@ -64,7 +67,7 @@ export class JobRunView {
             }
         );
 
-        JobRunView.Current = new JobRunView(panel, extensionUri, region, jobName);
+        JobRunView.Current = new JobRunView(panel, extensionUri, region, jobName, triggerFilePath);
     }
 
     private async loadDefaultArgs() {
@@ -72,11 +75,21 @@ export class JobRunView {
             const res = await api.GetGlueJobDescription(this.state.region, this.state.jobName);
             if (!res.isSuccessful || !res.result) {
                 this.state.args = [];
+                if (this.triggerFilePath) {
+                    await this.loadTriggerFileArgs();
+                }
                 this.render();
                 return;
             }
+            
             const defaults = res.result.Command?.DefaultArguments || {};
-            const args: ArgEntry[] = Object.keys(defaults).map(k => ({ key: k, value: String(defaults[k]), enabled: false, isDefault: true }));
+            let args: ArgEntry[] = Object.keys(defaults).map(k => ({ key: k, value: String(defaults[k]), enabled: false, isDefault: true }));
+            
+            // If trigger file is provided, load args from file
+            if (this.triggerFilePath) {
+                args = await this.loadArgsFromTriggerFile(this.triggerFilePath) || args;
+            }
+            
             this.state.args = args;
             this.render();
         } catch (err: any) {
@@ -84,6 +97,27 @@ export class JobRunView {
             this.state.args = [];
             this.render();
         }
+    }
+
+    private async loadTriggerFileArgs() {
+        if (!this.triggerFilePath) { return; }
+        this.state.args = await this.loadArgsFromTriggerFile(this.triggerFilePath) || [];
+    }
+
+    private async loadArgsFromTriggerFile(filePath: string): Promise<ArgEntry[] | undefined> {
+        try {
+            const fileUri = vscode.Uri.file(filePath);
+            const content = await vscode.workspace.fs.readFile(fileUri);
+            const text = new TextDecoder().decode(content);
+            const json = JSON.parse(text);
+            
+            if (typeof json === 'object' && json !== null) {
+                return Object.keys(json).map(k => ({ key: k, value: String(json[k]), enabled: true }));
+            }
+        } catch (err: any) {
+            ui.logToOutput("JobRunView.loadArgsFromTriggerFile error", err);
+        }
+        return undefined;
     }
 
     private render() {

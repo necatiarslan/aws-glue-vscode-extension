@@ -33,10 +33,15 @@ class GlueTreeDataProvider {
                 return [];
             }
             if (element.TreeItemType === GlueTreeItem_1.TreeItemType.Trigger) {
-                return [
+                const triggerFiles = GlueTreeView_1.GlueTreeView.Current.JobTriggerFiles[element.ResourceName] || [];
+                const children = [
                     new GlueTreeItem_1.GlueTreeItem("With Payload", GlueTreeItem_1.TreeItemType.TriggerWithPayload, element.Region, element.ResourceName, vscode.TreeItemCollapsibleState.None, { command: 'GlueTreeView.TriggerWithPayload', title: 'Trigger With Payload', arguments: [element] }, element),
                     new GlueTreeItem_1.GlueTreeItem("Without Payload", GlueTreeItem_1.TreeItemType.TriggerWithoutPayload, element.Region, element.ResourceName, vscode.TreeItemCollapsibleState.None, { command: 'GlueTreeView.TriggerWithoutPayload', title: 'Trigger Without Payload', arguments: [element] }, element),
                 ];
+                for (const filePath of triggerFiles) {
+                    children.push(new GlueTreeItem_1.GlueTreeItem(filePath, GlueTreeItem_1.TreeItemType.TriggerFile, element.Region, element.ResourceName, vscode.TreeItemCollapsibleState.None, { command: 'GlueTreeView.TriggerFromFile', title: 'Trigger From File', arguments: [{ jobName: element.ResourceName, region: element.Region, filePath }] }, element, { filePath }));
+                }
+                return children;
             }
             if (element.TreeItemType === GlueTreeItem_1.TreeItemType.Info) {
                 let jobInfo = element.Payload || GlueTreeView_1.GlueTreeView.Current.JobInfoCache[element.ResourceName];
