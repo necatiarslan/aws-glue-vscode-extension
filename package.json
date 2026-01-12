@@ -72,6 +72,26 @@
         "icon": "$(filter)"
       },
       {
+        "command": "GlueTreeView.DownloadJobCode",
+        "title": "Download Job Code",
+        "icon": "$(cloud-download)"
+      },
+      {
+        "command": "GlueTreeView.UploadJobCode",
+        "title": "Upload Job Code",
+        "icon": "$(cloud-upload)"
+      },
+      {
+        "command": "GlueTreeView.SetJobCode",
+        "title": "Set Code",
+        "icon": "$(file-add)"
+      },
+      {
+        "command": "GlueTreeView.UnsetJobCode",
+        "title": "Unset Code",
+        "icon": "$(trash)"
+      },
+      {
         "command": "GlueTreeView.ShowOnlyFavorite",
         "title": "Show Only Favorite",
         "icon": "$(bookmark)"
@@ -297,6 +317,26 @@
           "group": "inline"
         },
         {
+          "command": "GlueTreeView.DownloadJobCode",
+          "when": "view == GlueTreeView && viewItem == Code",
+          "group": "inline"
+        },
+        {
+          "command": "GlueTreeView.UploadJobCode",
+          "when": "view == GlueTreeView && viewItem == Code",
+          "group": "inline"
+        },
+        {
+          "command": "GlueTreeView.SetJobCode",
+          "when": "view == GlueTreeView && viewItem == Code",
+          "group": "inline"
+        },
+        {
+          "command": "GlueTreeView.UnsetJobCode",
+          "when": "view == GlueTreeView && viewItem == Code",
+          "group": "inline"
+        },
+        {
           "command": "GlueTreeView.ViewLog",
           "when": "view == GlueTreeView && viewItem == LogStream",
           "group": "inline"
@@ -355,6 +395,7 @@
     "@aws-sdk/client-cloudwatch-logs": "^3.964.0",
     "@aws-sdk/client-glue": "^3.964.0",
     "@aws-sdk/client-iam": "^3.964.0",
+    "@aws-sdk/client-s3": "^3.966.0",
     "@aws-sdk/client-sts": "^3.964.0",
     "@aws-sdk/credential-provider-ini": "^3.964.0",
     "@aws-sdk/credential-providers": "^3.964.0",

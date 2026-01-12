@@ -19,9 +19,17 @@ class GlueTreeDataProvider {
         if (element) {
             if (element.TreeItemType === GlueTreeItem_1.TreeItemType.Job) {
                 return [
+                    new GlueTreeItem_1.GlueTreeItem("Code", GlueTreeItem_1.TreeItemType.Code, element.Region, element.ResourceName, vscode.TreeItemCollapsibleState.Collapsed, undefined, element),
                     new GlueTreeItem_1.GlueTreeItem("Info", GlueTreeItem_1.TreeItemType.Info, element.Region, element.ResourceName, vscode.TreeItemCollapsibleState.Collapsed, undefined, element),
                     new GlueTreeItem_1.GlueTreeItem("Runs", GlueTreeItem_1.TreeItemType.RunGroup, element.Region, element.ResourceName, vscode.TreeItemCollapsibleState.Collapsed, undefined, element),
                 ];
+            }
+            if (element.TreeItemType === GlueTreeItem_1.TreeItemType.Code) {
+                const codePath = GlueTreeView_1.GlueTreeView.Current.JobCodePaths[element.ResourceName];
+                if (codePath) {
+                    return [new GlueTreeItem_1.GlueTreeItem(codePath, GlueTreeItem_1.TreeItemType.Detail, element.Region, "", vscode.TreeItemCollapsibleState.None, undefined, element)];
+                }
+                return [];
             }
             if (element.TreeItemType === GlueTreeItem_1.TreeItemType.Info) {
                 let jobInfo = element.Payload || GlueTreeView_1.GlueTreeView.Current.JobInfoCache[element.ResourceName];

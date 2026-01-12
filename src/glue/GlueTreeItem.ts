@@ -9,7 +9,8 @@ export enum TreeItemType {
 	Run = "Run",
 	Detail = "Detail",
 	Arguments = "Arguments",
-	Info = "Info"
+	Info = "Info",
+	Code = "Code"
 }
 
 export class GlueTreeItem extends vscode.TreeItem {
@@ -37,6 +38,9 @@ export class GlueTreeItem extends vscode.TreeItem {
 	setIcons() {
 		let iconName = "";
 		switch (this.TreeItemType) {
+			case TreeItemType.Code:
+				iconName = "file-code";
+				break;
 			case TreeItemType.Job:
 				iconName = "settings-gear";
 				break;

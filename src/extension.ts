@@ -16,6 +16,22 @@ export function activate(context: vscode.ExtensionContext) {
 		treeView.Filter();
 	});
 
+	vscode.commands.registerCommand('GlueTreeView.DownloadJobCode', async (node: GlueTreeItem) => {
+		await treeView.DownloadJobCode(node);
+	});
+
+	vscode.commands.registerCommand('GlueTreeView.UploadJobCode', async (node: GlueTreeItem) => {
+		await treeView.UploadJobCode(node);
+	});
+
+	vscode.commands.registerCommand('GlueTreeView.SetJobCode', async (node: GlueTreeItem) => {
+		await treeView.SetJobCode(node);
+	});
+
+	vscode.commands.registerCommand('GlueTreeView.UnsetJobCode', async (node: GlueTreeItem) => {
+		await treeView.UnsetJobCode(node);
+	});
+
 	vscode.commands.registerCommand('GlueTreeView.ShowOnlyFavorite', () => {
 		treeView.ShowOnlyFavorite();
 	});

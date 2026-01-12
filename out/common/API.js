@@ -13,9 +13,12 @@ exports.getIniProfileData = getIniProfileData;
 exports.isJsonString = isJsonString;
 exports.GetGlueJobRuns = GetGlueJobRuns;
 exports.GetGlueJobDescription = GetGlueJobDescription;
+exports.DownloadS3Object = DownloadS3Object;
+exports.UploadS3Object = UploadS3Object;
 /* eslint-disable @typescript-eslint/naming-convention */
 const credential_providers_1 = require("@aws-sdk/credential-providers");
 const client_glue_1 = require("@aws-sdk/client-glue");
+const client_s3_1 = require("@aws-sdk/client-s3");
 const client_cloudwatch_logs_1 = require("@aws-sdk/client-cloudwatch-logs");
 const client_sts_1 = require("@aws-sdk/client-sts");
 const ui = require("./UI");
@@ -71,6 +74,16 @@ async function GetSTSClient(region) {
         endpoint: GlueTreeView.GlueTreeView.Current?.AwsEndPoint,
     });
     return stsClient;
+}
+async function GetS3Client(region) {
+    const credentials = await GetCredentials();
+    const s3Client = new client_s3_1.S3Client({
+        region,
+        credentials,
+        endpoint: GlueTreeView.GlueTreeView.Current?.AwsEndPoint,
+        forcePathStyle: false,
+    });
+    return s3Client;
 }
 async function GetGlueJobList(region, filter) {
     let result = new MethodResult_1.MethodResult();
@@ -275,6 +288,51 @@ async function GetGlueJobDescription(region, jobName) {
     catch (error) {
         result.isSuccessful = false;
         result.error = error;
+        return result;
+    }
+}
+async function streamToBuffer(body) {
+    if (!body)
+        return new Uint8Array();
+    if (typeof body.transformToByteArray === 'function') {
+        return await body.transformToByteArray();
+    }
+    return await new Promise((resolve, reject) => {
+        const chunks = [];
+        body.on('data', (chunk) => chunks.push(Buffer.from(chunk)));
+        body.on('end', () => resolve(Buffer.concat(chunks)));
+        body.on('error', reject);
+    });
+}
+async function DownloadS3Object(region, bucket, key) {
+    let result = new MethodResult_1.MethodResult();
+    try {
+        const s3 = await GetS3Client(region);
+        const res = await s3.send(new client_s3_1.GetObjectCommand({ Bucket: bucket, Key: key }));
+        const data = await streamToBuffer(res.Body);
+        result.result = data;
+        result.isSuccessful = true;
+        return result;
+    }
+    catch (error) {
+        result.isSuccessful = false;
+        result.error = error;
+        ui.logToOutput("api.DownloadS3Object Error !!!", error);
+        return result;
+    }
+}
+async function UploadS3Object(region, bucket, key, content) {
+    let result = new MethodResult_1.MethodResult();
+    try {
+        const s3 = await GetS3Client(region);
+        await s3.send(new client_s3_1.PutObjectCommand({ Bucket: bucket, Key: key, Body: content }));
+        result.isSuccessful = true;
+        return result;
+    }
+    catch (error) {
+        result.isSuccessful = false;
+        result.error = error;
+        ui.logToOutput("api.UploadS3Object Error !!!", error);
         return result;
     }
 }

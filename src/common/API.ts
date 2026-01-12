@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { fromNodeProviderChain } from "@aws-sdk/credential-providers";
 import { GlueClient, GetJobCommand, GetJobsCommand, StartJobRunCommand, GetJobRunCommand, GetJobRunsCommand } from "@aws-sdk/client-glue";
+import { S3Client, GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import { CloudWatchLogsClient, OutputLogEvent, DescribeLogStreamsCommand, GetLogEventsCommand, DescribeLogGroupsCommand } from "@aws-sdk/client-cloudwatch-logs";
 import { STSClient, GetCallerIdentityCommand } from "@aws-sdk/client-sts";
 import * as ui from "./UI";
@@ -63,6 +64,17 @@ async function GetSTSClient(region: string) {
     endpoint: GlueTreeView.GlueTreeView.Current?.AwsEndPoint,
   });
   return stsClient;
+}
+
+async function GetS3Client(region: string) {
+  const credentials = await GetCredentials();
+  const s3Client = new S3Client({
+    region,
+    credentials,
+    endpoint: GlueTreeView.GlueTreeView.Current?.AwsEndPoint,
+    forcePathStyle: false,
+  });
+  return s3Client;
 }
 
 export async function GetGlueJobList(region: string, filter?: string): Promise<MethodResult<string[]>> {
@@ -261,6 +273,51 @@ export async function GetGlueJobDescription(region: string, jobName: string): Pr
   } catch (error: any) {
     result.isSuccessful = false;
     result.error = error;
+    return result;
+  }
+}
+
+async function streamToBuffer(body: any): Promise<Uint8Array> {
+  if (!body) return new Uint8Array();
+  if (typeof body.transformToByteArray === 'function') {
+    return await body.transformToByteArray();
+  }
+  return await new Promise((resolve, reject) => {
+    const chunks: Buffer[] = [];
+    body.on('data', (chunk: any) => chunks.push(Buffer.from(chunk)));
+    body.on('end', () => resolve(Buffer.concat(chunks)));
+    body.on('error', reject);
+  });
+}
+
+export async function DownloadS3Object(region: string, bucket: string, key: string): Promise<MethodResult<Uint8Array>> {
+  let result: MethodResult<Uint8Array> = new MethodResult<Uint8Array>();
+  try {
+    const s3 = await GetS3Client(region);
+    const res = await s3.send(new GetObjectCommand({ Bucket: bucket, Key: key }));
+    const data = await streamToBuffer(res.Body);
+    result.result = data;
+    result.isSuccessful = true;
+    return result;
+  } catch (error: any) {
+    result.isSuccessful = false;
+    result.error = error;
+    ui.logToOutput("api.DownloadS3Object Error !!!", error);
+    return result;
+  }
+}
+
+export async function UploadS3Object(region: string, bucket: string, key: string, content: Uint8Array): Promise<MethodResult<void>> {
+  let result: MethodResult<void> = new MethodResult<void>();
+  try {
+    const s3 = await GetS3Client(region);
+    await s3.send(new PutObjectCommand({ Bucket: bucket, Key: key, Body: content }));
+    result.isSuccessful = true;
+    return result;
+  } catch (error: any) {
+    result.isSuccessful = false;
+    result.error = error;
+    ui.logToOutput("api.UploadS3Object Error !!!", error);
     return result;
   }
 }

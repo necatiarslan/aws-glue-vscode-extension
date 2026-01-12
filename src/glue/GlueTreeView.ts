@@ -5,6 +5,7 @@ import { GlueTreeDataProvider } from './GlueTreeDataProvider';
 import * as ui from '../common/UI';
 import * as api from '../common/API';
 import { CloudWatchLogView } from '../cloudwatch/CloudWatchLogView';
+import { basename, join } from 'path';
 
 export class GlueTreeView {
 
@@ -21,6 +22,7 @@ export class GlueTreeView {
 	public JobRunsCache: {[key: string]: any[]} = {};
 	public LogStreamsCache: {[key: string]: string[]} = {};
 	public JobInfoCache: {[key: string]: any} = {};
+	public JobCodePaths: {[key: string]: string} = {};
 
 	constructor(context: vscode.ExtensionContext) {
 		GlueTreeView.Current = this;
@@ -117,6 +119,7 @@ export class GlueTreeView {
 			this.context.globalState.update('ShowHiddenNodes', this.isShowHiddenNodes);
 			this.context.globalState.update('ResourceList', this.ResourceList);
 			this.context.globalState.update('AwsEndPoint', this.AwsEndPoint);
+			this.context.globalState.update('JobCodePaths', this.JobCodePaths);
 		} catch (error) {}
 	}
 
@@ -128,6 +131,7 @@ export class GlueTreeView {
 			this.isShowOnlyFavorite = this.context.globalState.get('ShowOnlyFavorite') || false;
 			this.isShowHiddenNodes = this.context.globalState.get('ShowHiddenNodes') || false;
 			this.ResourceList = this.context.globalState.get('ResourceList') || [];
+			this.JobCodePaths = this.context.globalState.get('JobCodePaths') || {};
 		} catch (error) {}
 	}
 
@@ -276,11 +280,132 @@ export class GlueTreeView {
 		});
 	}
 
+	private parseS3Location(location: string): { bucket: string, key: string } {
+		const match = location.match(/^s3:\/\/([^\/]+)\/(.+)$/i);
+		if(!match) {
+			throw new Error(`Invalid S3 location: ${location}`);
+		}
+		return { bucket: match[1], key: match[2] };
+	}
+
+	private async getJobInfo(jobName: string, region: string) {
+		if(!this.JobInfoCache[jobName]) {
+			const result = await api.GetGlueJobDescription(region, jobName);
+			if(!result.isSuccessful) {
+				throw result.error || new Error("Failed to load job info");
+			}
+			this.JobInfoCache[jobName] = result.result;
+		}
+		return this.JobInfoCache[jobName];
+	}
+
+	async DownloadJobCode(node: GlueTreeItem) {
+		if(node.TreeItemType !== TreeItemType.Code) return;
+
+		try {
+			const jobName = node.ResourceName;
+			const jobInfo = await this.getJobInfo(jobName, node.Region);
+			const scriptLocation = jobInfo?.Command?.ScriptLocation as string | undefined;
+			if(!scriptLocation) {
+				ui.showInfoMessage('Script location not found in job');
+				return;
+			}
+
+			const { bucket, key } = this.parseS3Location(scriptLocation);
+			const defaultFolder = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath || this.context.globalStorageUri.fsPath;
+			const defaultPath = join(defaultFolder, basename(key || jobName));
+			const target = await vscode.window.showSaveDialog({ defaultUri: vscode.Uri.file(defaultPath), saveLabel: 'Download Job Code' });
+			if(!target) { return; }
+
+			ui.logToOutput(`Downloading Glue job code from ${scriptLocation}`);
+			const result = await api.DownloadS3Object(node.Region, bucket, key);
+			if(!result.isSuccessful) {
+				ui.showErrorMessage('Download job code failed', result.error);
+				return;
+			}
+
+			await vscode.workspace.fs.writeFile(target, Buffer.from(result.result));
+			ui.showInfoMessage(`Glue job code downloaded to ${target.fsPath}`);
+		} catch (error: any) {
+			ui.showErrorMessage('Download job code error', error);
+		}
+	}
+
+	async UploadJobCode(node: GlueTreeItem) {
+		if(node.TreeItemType !== TreeItemType.Code) return;
+
+		try {
+			const jobName = node.ResourceName;
+			const codePath = this.JobCodePaths[jobName];
+			
+			if(!codePath) {
+				ui.showInfoMessage('No code path set. Please use "Set Code" first to select a file.');
+				return;
+			}
+
+			const jobInfo = await this.getJobInfo(jobName, node.Region);
+			const scriptLocation = jobInfo?.Command?.ScriptLocation as string | undefined;
+			if(!scriptLocation) {
+				ui.showInfoMessage('Script location not found in job');
+				return;
+			}
+
+			const { bucket, key } = this.parseS3Location(scriptLocation);
+			const fileUri = vscode.Uri.file(codePath);
+			const content = await vscode.workspace.fs.readFile(fileUri);
+			ui.logToOutput(`Uploading Glue job code to ${scriptLocation}`);
+			const result = await api.UploadS3Object(node.Region, bucket, key, content);
+			if(!result.isSuccessful) {
+				ui.showErrorMessage('Upload job code failed', result.error);
+				return;
+			}
+
+			ui.showInfoMessage(`Glue job code uploaded from ${codePath}`);
+		} catch (error: any) {
+			ui.showErrorMessage('Upload job code error', error);
+		}
+	}
+
 	async ShowRunInfo(node: GlueTreeItem) {
 		if(node.TreeItemType !== TreeItemType.Run || !node.Payload) return;
 
 		let run = node.Payload;
 		let jsonString = JSON.stringify(run, null, 2);
 		ui.ShowTextDocument(jsonString, "json");
+	}
+
+	async SetJobCode(node: GlueTreeItem) {
+		if(node.TreeItemType !== TreeItemType.Code) return;
+
+		try {
+			const jobName = node.ResourceName;
+			const fileUris = await vscode.window.showOpenDialog({ 
+				canSelectMany: false, 
+				openLabel: 'Select Job Code File' 
+			});
+			if(!fileUris || fileUris.length === 0) { return; }
+
+			const fileUri = fileUris[0];
+			this.JobCodePaths[jobName] = fileUri.fsPath;
+			this.SaveState();
+			this.treeDataProvider.Refresh();
+			ui.showInfoMessage(`Code path set for ${jobName}`);
+		} catch (error: any) {
+			ui.showErrorMessage('Set job code error', error);
+		}
+	}
+
+	async UnsetJobCode(node: GlueTreeItem) {
+		if(node.TreeItemType !== TreeItemType.Code) return;
+
+		try {
+			const jobName = node.ResourceName;
+			delete this.JobCodePaths[jobName];
+			this.SaveState();
+			this.treeDataProvider.Refresh();
+			ui.showInfoMessage(`Code path unset for ${jobName}`);
+		} catch (error: any) {
+			ui.showErrorMessage('Unset job code error', error);
+		}
 	}
 }

@@ -13,6 +13,7 @@ var TreeItemType;
     TreeItemType["Detail"] = "Detail";
     TreeItemType["Arguments"] = "Arguments";
     TreeItemType["Info"] = "Info";
+    TreeItemType["Code"] = "Code";
 })(TreeItemType || (exports.TreeItemType = TreeItemType = {}));
 class GlueTreeItem extends vscode.TreeItem {
     label;
@@ -43,6 +44,9 @@ class GlueTreeItem extends vscode.TreeItem {
     setIcons() {
         let iconName = "";
         switch (this.TreeItemType) {
+            case TreeItemType.Code:
+                iconName = "file-code";
+                break;
             case TreeItemType.Job:
                 iconName = "settings-gear";
                 break;
