@@ -22,6 +22,7 @@ class JobRunView {
             jobName,
             args: [],
             isRunning: false,
+            triggerFilePath,
         };
         this.panel.onDidDispose(this.dispose, null, this.disposables);
         this.panel.webview.onDidReceiveMessage(this.handleMessage, this, this.disposables);
@@ -34,6 +35,7 @@ class JobRunView {
             JobRunView.Current.state.region = region;
             JobRunView.Current.state.jobName = jobName;
             JobRunView.Current.triggerFilePath = triggerFilePath;
+            JobRunView.Current.state.triggerFilePath = triggerFilePath;
             JobRunView.Current.loadDefaultArgs();
             JobRunView.Current.render();
             return;
@@ -94,6 +96,7 @@ class JobRunView {
         this.panel.webview.html = this.getHtml(this.panel.webview, this.extensionUri);
     }
     sendState() {
+        this.state.triggerFilePath = this.triggerFilePath;
         this.panel.webview.postMessage({ type: "state", state: this.state });
     }
     async handleMessage(message) {
@@ -192,139 +195,205 @@ class JobRunView {
     }
     getHtml(webview, extensionUri) {
         const codiconsUri = ui.getUri(webview, extensionUri, ["node_modules", "@vscode", "codicons", "dist", "codicon.css"]);
+        const vscodeElementsUri = ui.getUri(webview, extensionUri, ["node_modules", "@vscode-elements", "elements", "dist", "bundled.js"]);
+        const styleUri = ui.getUri(webview, extensionUri, ["media", "style.css"]);
         const nonce = this.getNonce();
         return `<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${webview.cspSource} https:; style-src ${webview.cspSource} 'unsafe-inline'; script-src 'nonce-${nonce}'; font-src ${webview.cspSource} https:;">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link href="${codiconsUri}" rel="stylesheet" />
-  <style>
-    body { font-family: var(--vscode-font-family); margin: 0; padding: 12px; }
-    h2 { margin-top: 0; }
-    .row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
-    .arg-row { display: grid; grid-template-columns: 120px 1fr 1fr 80px; gap: 6px; align-items: center; margin-bottom: 4px; }
-    input[type="text"] { width: 100%; }
-    .muted { opacity: 0.7; }
-    .spinner { display: inline-flex; align-items: center; gap: 6px; }
-    .spinner .codicon { animation: spin 1s linear infinite; }
-    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-    .btn-row { display: flex; gap: 8px; margin-top: 12px; }
-    .badge { padding: 2px 6px; border-radius: 4px; background: var(--vscode-editor-inactiveSelectionBackground); }
-  </style>
+    <meta charset="UTF-8" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${webview.cspSource} https:; style-src ${webview.cspSource} 'unsafe-inline'; script-src 'nonce-${nonce}' ${webview.cspSource}; font-src ${webview.cspSource} https:;">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script type="module" src="${vscodeElementsUri}"></script>
+    <link rel="stylesheet" href="${styleUri}">
+    <link href="${codiconsUri}" rel="stylesheet" />
+    <style>
+        :root {
+            --layout-padding: 12px;
+        }
+        body { font-family: var(--vscode-font-family); margin: 0; padding: var(--layout-padding); color: var(--vscode-foreground); }
+        .layout { display: flex; flex-direction: column; gap: 12px; }
+        .headline { display: flex; flex-direction: column; gap: 6px; }
+        .headline-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .badge { padding: 2px 6px; border-radius: 4px; background: var(--vscode-editor-inactiveSelectionBackground); }
+        .spinner { display: inline-flex; align-items: center; gap: 6px; }
+        .spinner .codicon { animation: spin 1s linear infinite; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .section-header { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+        .section-title { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; }
+        .arg-list { display: flex; flex-direction: column; gap: 6px; }
+        .arg-row { display: grid; grid-template-columns: 28px 1fr 1fr 110px; gap: 8px; align-items: center; padding: 6px 8px; border: 1px solid var(--vscode-panel-border); border-radius: 4px; background: var(--vscode-editor-background); }
+        .arg-row[data-default="true"] { opacity: 0.85; }
+        .arg-row .default-label { color: var(--vscode-descriptionForeground); font-size: 11px; }
+        .arg-value { display: flex; flex-direction: column; gap: 4px; }
+        .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
+    </style>
 </head>
 <body>
-  <h2 id="title">Job</h2>
-  <div class="row">
-    <span class="badge" id="region"></span>
-    <span class="badge" id="runId"></span>
-    <span class="spinner" id="spinner" style="display:none;"><span class="codicon codicon-sync"></span>Running...</span>
-  </div>
+    <section class="layout">
+        <div class="headline">
+            <div class="headline-row">
+                <h2 id="title" style="margin: 0;">Job</h2>
+                <span class="badge" id="triggerFile" title="Trigger file path"></span>
+            </div>
+            <div class="headline-row">
+                <span class="badge" id="region"></span>
+                <span class="badge" id="runId"></span>
+                <span class="spinner" id="spinner" style="display:none;"><span class="codicon codicon-sync"></span>Running...</span>
+            </div>
+        </div>
 
-  <h3>Arguments</h3>
-  <div id="args"></div>
-  <div class="row">
-    <button id="addArg">Add Argument</button>
-  </div>
+        <vscode-divider></vscode-divider>
 
-  <div class="btn-row">
-    <button id="start">Trigger</button>
-    <button id="stop">Stop</button>
-    <button id="logsOut">Output Logs</button>
-    <button id="logsErr">Error Logs</button>
-  </div>
+        <div class="section-header">
+            <div class="section-title">
+                <span class="codicon codicon-gear"></span>
+                <span>Arguments</span>
+            </div>
+            <vscode-button id="addArg" appearance="secondary">
+                <span class="codicon codicon-add"></span>
+                Add Argument
+            </vscode-button>
+        </div>
 
-  <script nonce="${nonce}">
-    const vscode = acquireVsCodeApi();
+        <div id="args" class="arg-list"></div>
 
-    const stateEl = { title: document.getElementById('title'), region: document.getElementById('region'), runId: document.getElementById('runId'), spinner: document.getElementById('spinner'), args: document.getElementById('args') };
+        <vscode-divider></vscode-divider>
 
-    function renderArgs(args) {
-      stateEl.args.innerHTML = '';
-      (args || []).forEach((arg, idx) => {
-        const row = document.createElement('div');
-        row.className = 'arg-row';
+        <div class="btn-row">
+            <vscode-button id="start" appearance="primary">Trigger</vscode-button>
+            <vscode-button id="stop" appearance="secondary">Stop</vscode-button>
+            <vscode-button id="logsOut" appearance="secondary">Output Logs</vscode-button>
+            <vscode-button id="logsErr" appearance="secondary">Error Logs</vscode-button>
+        </div>
+    </section>
 
-        const enable = document.createElement('input');
-        enable.type = 'checkbox';
-        enable.checked = !!arg.enabled;
-        enable.addEventListener('change', () => {
-          arg.enabled = enable.checked;
-          keyInput.disabled = !arg.enabled;
-          valInput.disabled = !arg.enabled;
-          removeBtn.disabled = !arg.enabled;
+    <script nonce="${nonce}">
+        const vscode = acquireVsCodeApi();
+
+        const stateEl = {
+            title: document.getElementById('title'),
+            region: document.getElementById('region'),
+            runId: document.getElementById('runId'),
+            triggerFile: document.getElementById('triggerFile'),
+            spinner: document.getElementById('spinner'),
+            args: document.getElementById('args'),
+            addArg: document.getElementById('addArg'),
+            start: document.getElementById('start'),
+            stop: document.getElementById('stop'),
+            logsOut: document.getElementById('logsOut'),
+            logsErr: document.getElementById('logsErr'),
+        };
+
+        function toggleArgInputs(arg, elements) {
+            const enabled = !!arg.enabled;
+            elements.key.disabled = !enabled;
+            elements.value.disabled = !enabled;
+            elements.remove.disabled = !enabled;
+        }
+
+        function renderArgs(args) {
+            stateEl.args.innerHTML = '';
+            (args || []).forEach((arg, idx) => {
+                const row = document.createElement('div');
+                row.className = 'arg-row';
+                row.dataset.default = arg.isDefault ? 'true' : 'false';
+
+                const enable = document.createElement('vscode-checkbox');
+                enable.checked = !!arg.enabled;
+                enable.setAttribute('aria-label', 'Enable argument');
+
+                const keyInput = document.createElement('vscode-textfield');
+                keyInput.placeholder = 'Key';
+                keyInput.value = arg.key || '';
+                keyInput.setAttribute('size', 'small');
+
+                const valInput = document.createElement('vscode-textfield');
+                valInput.placeholder = 'Value';
+                valInput.value = arg.value || '';
+                valInput.setAttribute('size', 'small');
+
+                const valueCell = document.createElement('div');
+                valueCell.className = 'arg-value';
+                valueCell.appendChild(valInput);
+
+                const removeBtn = document.createElement('vscode-button');
+                removeBtn.textContent = 'Remove';
+                removeBtn.appearance = 'secondary';
+
+                if (arg.isDefault) {
+                    const label = document.createElement('span');
+                    label.className = 'default-label';
+                    label.textContent = 'Default';
+                    valueCell.appendChild(label);
+                }
+
+                enable.addEventListener('change', () => {
+                    arg.enabled = !!enable.checked;
+                    toggleArgInputs(arg, { key: keyInput, value: valInput, remove: removeBtn });
+                });
+
+                keyInput.addEventListener('input', () => { arg.key = keyInput.value; });
+                valInput.addEventListener('input', () => { arg.value = valInput.value; });
+
+                removeBtn.addEventListener('click', () => {
+                    args.splice(idx, 1);
+                    renderArgs(args);
+                });
+
+                toggleArgInputs(arg, { key: keyInput, value: valInput, remove: removeBtn });
+
+                row.appendChild(enable);
+                row.appendChild(keyInput);
+                row.appendChild(valueCell);
+                row.appendChild(removeBtn);
+                stateEl.args.appendChild(row);
+            });
+        }
+
+        function render(state) {
+            stateEl.title.textContent = 'Job: ' + state.jobName;
+            stateEl.region.textContent = 'Region: ' + state.region;
+            stateEl.runId.textContent = state.currentRunId ? ('Run: ' + state.currentRunId) : '';
+            stateEl.triggerFile.textContent = state.triggerFilePath ? ('Trigger: ' + state.triggerFilePath) : '';
+            stateEl.triggerFile.style.display = state.triggerFilePath ? 'inline-block' : 'none';
+            stateEl.spinner.style.display = state.isRunning ? 'inline-flex' : 'none';
+            renderArgs(state.args || []);
+        }
+
+        stateEl.addArg.addEventListener('click', () => {
+            const st = currentState || { args: [] };
+            st.args.push({ key: '', value: '', enabled: true });
+            renderArgs(st.args);
         });
 
-        const keyInput = document.createElement('input');
-        keyInput.type = 'text';
-        keyInput.value = arg.key || '';
-        keyInput.disabled = !arg.enabled;
-        keyInput.addEventListener('input', () => arg.key = keyInput.value);
-
-        const valInput = document.createElement('input');
-        valInput.type = 'text';
-        valInput.value = arg.value || '';
-        valInput.disabled = !arg.enabled;
-        valInput.addEventListener('input', () => arg.value = valInput.value);
-
-        const removeBtn = document.createElement('button');
-        removeBtn.textContent = 'Remove';
-        removeBtn.disabled = !arg.enabled;
-        removeBtn.addEventListener('click', () => {
-          args.splice(idx, 1);
-          renderArgs(args);
+        stateEl.start.addEventListener('click', () => {
+            vscode.postMessage({ command: 'start', args: (currentState?.args || []) });
         });
 
-        row.appendChild(enable);
-        row.appendChild(keyInput);
-        row.appendChild(valInput);
-        row.appendChild(removeBtn);
-        stateEl.args.appendChild(row);
-      });
-    }
+        stateEl.stop.addEventListener('click', () => {
+            vscode.postMessage({ command: 'stop' });
+        });
 
-    function render(state) {
-      stateEl.title.textContent = 'Job: ' + state.jobName;
-      stateEl.region.textContent = 'Region: ' + state.region;
-      stateEl.runId.textContent = state.currentRunId ? ('Run: ' + state.currentRunId) : '';
-      stateEl.spinner.style.display = state.isRunning ? 'inline-flex' : 'none';
-      renderArgs(state.args || []);
-    }
+        stateEl.logsOut.addEventListener('click', () => {
+            vscode.postMessage({ command: 'openLogs', kind: 'output' });
+        });
 
-    document.getElementById('addArg').addEventListener('click', () => {
-      const st = currentState || { args: [] };
-      st.args.push({ key: '', value: '', enabled: true });
-      renderArgs(st.args);
-    });
+        stateEl.logsErr.addEventListener('click', () => {
+            vscode.postMessage({ command: 'openLogs', kind: 'error' });
+        });
 
-    document.getElementById('start').addEventListener('click', () => {
-      vscode.postMessage({ command: 'start', args: (currentState?.args || []) });
-    });
+        let currentState = undefined;
+        window.addEventListener('message', (event) => {
+            const message = event.data;
+            if (message.type === 'state') {
+                currentState = message.state;
+                render(currentState);
+            }
+        });
 
-    document.getElementById('stop').addEventListener('click', () => {
-      vscode.postMessage({ command: 'stop' });
-    });
-
-    document.getElementById('logsOut').addEventListener('click', () => {
-      vscode.postMessage({ command: 'openLogs', kind: 'output' });
-    });
-
-    document.getElementById('logsErr').addEventListener('click', () => {
-      vscode.postMessage({ command: 'openLogs', kind: 'error' });
-    });
-
-    let currentState = undefined;
-    window.addEventListener('message', (event) => {
-      const message = event.data;
-      if (message.type === 'state') {
-        currentState = message.state;
-        render(currentState);
-      }
-    });
-
-    vscode.postMessage({ command: 'ready' });
-  </script>
+        vscode.postMessage({ command: 'ready' });
+    </script>
 </body>
 </html>`;
     }
