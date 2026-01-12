@@ -5,6 +5,7 @@ import { GlueTreeDataProvider } from './GlueTreeDataProvider';
 import * as ui from '../common/UI';
 import * as api from '../common/API';
 import { CloudWatchLogView } from '../cloudwatch/CloudWatchLogView';
+import { JobRunView } from './JobRunView';
 import { basename, join } from 'path';
 
 export class GlueTreeView {
@@ -166,21 +167,7 @@ export class GlueTreeView {
 	}
 
 	async RunJob(node: GlueTreeItem) {
-		if(node.IsRunning) { return;}
-		node.IsRunning = true;
-		this.treeDataProvider.Refresh();
-		
-		let result = await api.StartGlueJobRun(node.Region, node.ResourceName);
-		if(!result.isSuccessful)
-		{
-			ui.showErrorMessage('Run Job Error !!!', result.error);
-			node.IsRunning = false;
-			this.treeDataProvider.Refresh();
-			return;
-		}
-		ui.showInfoMessage('Job Run Started Successfully');
-		node.IsRunning = false;
-		this.treeDataProvider.Refresh();
+		JobRunView.Render(this.context.extensionUri, node.Region, node.ResourceName);
 	}
 
 	async SelectAwsProfile(node: GlueTreeItem) {

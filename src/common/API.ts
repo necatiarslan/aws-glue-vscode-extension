@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { fromNodeProviderChain } from "@aws-sdk/credential-providers";
-import { GlueClient, GetJobCommand, GetJobsCommand, StartJobRunCommand, GetJobRunCommand, GetJobRunsCommand } from "@aws-sdk/client-glue";
+import { GlueClient, GetJobCommand, GetJobsCommand, StartJobRunCommand, GetJobRunCommand, GetJobRunsCommand, BatchStopJobRunCommand } from "@aws-sdk/client-glue";
 import { S3Client, GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import { CloudWatchLogsClient, OutputLogEvent, DescribeLogStreamsCommand, GetLogEventsCommand, DescribeLogGroupsCommand } from "@aws-sdk/client-cloudwatch-logs";
 import { STSClient, GetCallerIdentityCommand } from "@aws-sdk/client-sts";
@@ -273,6 +273,42 @@ export async function GetGlueJobRuns(region: string, jobName: string): Promise<M
     result.isSuccessful = false;
     result.error = error;
     ui.logToOutput("api.GetGlueJobRuns Error !!!", error);
+    return result;
+  }
+}
+
+export async function GetGlueJobRun(region: string, jobName: string, jobRunId: string): Promise<MethodResult<any>> {
+  let result: MethodResult<any> = new MethodResult<any>();
+  try {
+    const glue = await GetGlueClient(region);
+    const cmd = new GetJobRunCommand({ JobName: jobName, RunId: jobRunId, PredecessorsIncluded: true });
+    const res = await glue.send(cmd);
+    result.result = res.JobRun;
+    result.isSuccessful = true;
+    return result;
+  } catch (error: any) {
+    result.isSuccessful = false;
+    result.error = error;
+    ui.logToOutput("api.GetGlueJobRun Error !!!", error);
+    return result;
+  }
+}
+
+export async function StopGlueJobRun(region: string, jobName: string, jobRunId: string): Promise<MethodResult<string[]>> {
+  let result: MethodResult<string[]> = new MethodResult<string[]>();
+  result.result = [];
+  try {
+    const glue = await GetGlueClient(region);
+    const cmd = new BatchStopJobRunCommand({ JobName: jobName, JobRunIds: [jobRunId] });
+    const res = await glue.send(cmd);
+    const stopped = res.SuccessfulSubmissions?.map(s => s?.JobRunId ?? '')?.filter(id => id) ?? [];
+    result.result = stopped;
+    result.isSuccessful = true;
+    return result;
+  } catch (error: any) {
+    result.isSuccessful = false;
+    result.error = error;
+    ui.logToOutput("api.StopGlueJobRun Error !!!", error);
     return result;
   }
 }

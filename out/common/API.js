@@ -13,6 +13,8 @@ exports.GetAwsProfileList = GetAwsProfileList;
 exports.getIniProfileData = getIniProfileData;
 exports.isJsonString = isJsonString;
 exports.GetGlueJobRuns = GetGlueJobRuns;
+exports.GetGlueJobRun = GetGlueJobRun;
+exports.StopGlueJobRun = StopGlueJobRun;
 exports.GetGlueJobDescription = GetGlueJobDescription;
 exports.DownloadS3Object = DownloadS3Object;
 exports.UploadS3Object = UploadS3Object;
@@ -289,6 +291,42 @@ async function GetGlueJobRuns(region, jobName) {
         result.isSuccessful = false;
         result.error = error;
         ui.logToOutput("api.GetGlueJobRuns Error !!!", error);
+        return result;
+    }
+}
+async function GetGlueJobRun(region, jobName, jobRunId) {
+    let result = new MethodResult_1.MethodResult();
+    try {
+        const glue = await GetGlueClient(region);
+        const cmd = new client_glue_1.GetJobRunCommand({ JobName: jobName, RunId: jobRunId, PredecessorsIncluded: true });
+        const res = await glue.send(cmd);
+        result.result = res.JobRun;
+        result.isSuccessful = true;
+        return result;
+    }
+    catch (error) {
+        result.isSuccessful = false;
+        result.error = error;
+        ui.logToOutput("api.GetGlueJobRun Error !!!", error);
+        return result;
+    }
+}
+async function StopGlueJobRun(region, jobName, jobRunId) {
+    let result = new MethodResult_1.MethodResult();
+    result.result = [];
+    try {
+        const glue = await GetGlueClient(region);
+        const cmd = new client_glue_1.BatchStopJobRunCommand({ JobName: jobName, JobRunIds: [jobRunId] });
+        const res = await glue.send(cmd);
+        const stopped = res.SuccessfulSubmissions?.map(s => s?.JobRunId ?? '')?.filter(id => id) ?? [];
+        result.result = stopped;
+        result.isSuccessful = true;
+        return result;
+    }
+    catch (error) {
+        result.isSuccessful = false;
+        result.error = error;
+        ui.logToOutput("api.StopGlueJobRun Error !!!", error);
         return result;
     }
 }

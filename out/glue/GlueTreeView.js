@@ -8,6 +8,7 @@ const GlueTreeDataProvider_1 = require("./GlueTreeDataProvider");
 const ui = require("../common/UI");
 const api = require("../common/API");
 const CloudWatchLogView_1 = require("../cloudwatch/CloudWatchLogView");
+const JobRunView_1 = require("./JobRunView");
 const path_1 = require("path");
 class GlueTreeView {
     static Current;
@@ -158,21 +159,7 @@ class GlueTreeView {
         ui.showInfoMessage("Work In Progress");
     }
     async RunJob(node) {
-        if (node.IsRunning) {
-            return;
-        }
-        node.IsRunning = true;
-        this.treeDataProvider.Refresh();
-        let result = await api.StartGlueJobRun(node.Region, node.ResourceName);
-        if (!result.isSuccessful) {
-            ui.showErrorMessage('Run Job Error !!!', result.error);
-            node.IsRunning = false;
-            this.treeDataProvider.Refresh();
-            return;
-        }
-        ui.showInfoMessage('Job Run Started Successfully');
-        node.IsRunning = false;
-        this.treeDataProvider.Refresh();
+        JobRunView_1.JobRunView.Render(this.context.extensionUri, node.Region, node.ResourceName);
     }
     async SelectAwsProfile(node) {
         var result = await api.GetAwsProfileList();
