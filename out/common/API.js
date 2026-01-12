@@ -84,7 +84,7 @@ async function GetS3Client(region) {
         region,
         credentials,
         endpoint: GlueTreeView.GlueTreeView.Current?.AwsEndPoint,
-        forcePathStyle: false,
+        forcePathStyle: true,
     });
     return s3Client;
 }
