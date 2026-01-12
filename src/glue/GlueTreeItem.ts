@@ -3,6 +3,8 @@ import * as vscode from 'vscode';
 
 export enum TreeItemType {
 	Job = "Job",
+	Reports = "Reports",
+	JobRunsReport = "JobRunsReport",
 	RunGroup = "RunGroup",
 	LogGroup = "LogGroup",
 	LogStream = "LogStream",
@@ -42,6 +44,12 @@ export class GlueTreeItem extends vscode.TreeItem {
 	setIcons() {
 		let iconName = "";
 		switch (this.TreeItemType) {
+				case TreeItemType.Reports:
+					iconName = "report";
+					break;
+				case TreeItemType.JobRunsReport:
+					iconName = "list-tree";
+					break;
 			case TreeItemType.Trigger:
 				iconName = "zap";
 				break;

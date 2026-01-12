@@ -22,7 +22,13 @@ class GlueTreeDataProvider {
                     new GlueTreeItem_1.GlueTreeItem("Code", GlueTreeItem_1.TreeItemType.Code, element.Region, element.ResourceName, vscode.TreeItemCollapsibleState.Collapsed, undefined, element),
                     new GlueTreeItem_1.GlueTreeItem("Trigger", GlueTreeItem_1.TreeItemType.Trigger, element.Region, element.ResourceName, vscode.TreeItemCollapsibleState.Collapsed, undefined, element),
                     new GlueTreeItem_1.GlueTreeItem("Info", GlueTreeItem_1.TreeItemType.Info, element.Region, element.ResourceName, vscode.TreeItemCollapsibleState.Collapsed, undefined, element),
+                    new GlueTreeItem_1.GlueTreeItem("Reports", GlueTreeItem_1.TreeItemType.Reports, element.Region, element.ResourceName, vscode.TreeItemCollapsibleState.Collapsed, undefined, element),
                     new GlueTreeItem_1.GlueTreeItem("Runs", GlueTreeItem_1.TreeItemType.RunGroup, element.Region, element.ResourceName, vscode.TreeItemCollapsibleState.Collapsed, undefined, element),
+                ];
+            }
+            if (element.TreeItemType === GlueTreeItem_1.TreeItemType.Reports) {
+                return [
+                    new GlueTreeItem_1.GlueTreeItem("Job Runs", GlueTreeItem_1.TreeItemType.JobRunsReport, element.Region, element.ResourceName, vscode.TreeItemCollapsibleState.None, { command: 'GlueTreeView.ShowJobRunsReport', title: 'Show Job Runs Report', arguments: [element] }, element),
                 ];
             }
             if (element.TreeItemType === GlueTreeItem_1.TreeItemType.Code) {

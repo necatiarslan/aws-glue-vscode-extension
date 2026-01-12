@@ -147,6 +147,11 @@
         "icon": "$(run)"
       },
       {
+        "command": "GlueTreeView.ShowJobRunsReport",
+        "title": "Job Runs Report",
+        "icon": "$(history)"
+      },
+      {
         "command": "GlueTreeView.ViewLatestLog",
         "title": "Latest Logs",
         "icon": "$(output)"
@@ -314,6 +319,11 @@
         {
           "command": "GlueTreeView.RunJob",
           "when": "view == GlueTreeView && viewItem == Job",
+          "group": "inline"
+        },
+        {
+          "command": "GlueTreeView.ShowJobRunsReport",
+          "when": "view == GlueTreeView && viewItem == JobRunsReport",
           "group": "inline"
         },
         {

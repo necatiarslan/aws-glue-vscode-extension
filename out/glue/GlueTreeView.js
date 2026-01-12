@@ -9,6 +9,7 @@ const ui = require("../common/UI");
 const api = require("../common/API");
 const CloudWatchLogView_1 = require("../cloudwatch/CloudWatchLogView");
 const JobRunView_1 = require("./JobRunView");
+const JobRunsReportView_1 = require("./JobRunsReportView");
 const path_1 = require("path");
 class GlueTreeView {
     static Current;
@@ -163,6 +164,12 @@ class GlueTreeView {
     }
     async RunJob(node) {
         JobRunView_1.JobRunView.Render(this.context.extensionUri, node.Region, node.ResourceName);
+    }
+    async ShowJobRunsReport(node) {
+        if (node.TreeItemType !== GlueTreeItem_1.TreeItemType.JobRunsReport) {
+            return;
+        }
+        JobRunsReportView_1.JobRunsReportView.Render(this.context.extensionUri, node.Region, node.ResourceName);
     }
     async SelectAwsProfile(node) {
         var result = await api.GetAwsProfileList();

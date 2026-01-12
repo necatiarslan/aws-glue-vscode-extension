@@ -6,6 +6,7 @@ import * as ui from '../common/UI';
 import * as api from '../common/API';
 import { CloudWatchLogView } from '../cloudwatch/CloudWatchLogView';
 import { JobRunView } from './JobRunView';
+import { JobRunsReportView } from './JobRunsReportView';
 import { basename, join } from 'path';
 
 export class GlueTreeView {
@@ -171,6 +172,11 @@ export class GlueTreeView {
 
 	async RunJob(node: GlueTreeItem) {
 		JobRunView.Render(this.context.extensionUri, node.Region, node.ResourceName);
+	}
+
+	async ShowJobRunsReport(node: GlueTreeItem) {
+		if (node.TreeItemType !== TreeItemType.JobRunsReport) { return; }
+		JobRunsReportView.Render(this.context.extensionUri, node.Region, node.ResourceName);
 	}
 
 	async SelectAwsProfile(node: GlueTreeItem) {

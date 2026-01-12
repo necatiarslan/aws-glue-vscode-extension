@@ -92,6 +92,10 @@ export function activate(context: vscode.ExtensionContext) {
 		treeView.RunJob(node);
 	});
 
+	vscode.commands.registerCommand('GlueTreeView.ShowJobRunsReport', async (node: GlueTreeItem) => {
+		await treeView.ShowJobRunsReport(node);
+	});
+
 	vscode.commands.registerCommand('GlueTreeView.ViewLatestLog', (node: GlueTreeItem) => {
 		// Deprecated
 	});

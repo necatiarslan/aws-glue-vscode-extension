@@ -25,7 +25,13 @@ export class GlueTreeDataProvider implements vscode.TreeDataProvider<GlueTreeIte
 					new GlueTreeItem("Code", TreeItemType.Code, element.Region, element.ResourceName, vscode.TreeItemCollapsibleState.Collapsed, undefined, element),
 					new GlueTreeItem("Trigger", TreeItemType.Trigger, element.Region, element.ResourceName, vscode.TreeItemCollapsibleState.Collapsed, undefined, element),
 					new GlueTreeItem("Info", TreeItemType.Info, element.Region, element.ResourceName, vscode.TreeItemCollapsibleState.Collapsed, undefined, element),
+					new GlueTreeItem("Reports", TreeItemType.Reports, element.Region, element.ResourceName, vscode.TreeItemCollapsibleState.Collapsed, undefined, element),
 					new GlueTreeItem("Runs", TreeItemType.RunGroup, element.Region, element.ResourceName, vscode.TreeItemCollapsibleState.Collapsed, undefined, element),
+				];
+			}
+			if (element.TreeItemType === TreeItemType.Reports) {
+				return [
+					new GlueTreeItem("Job Runs", TreeItemType.JobRunsReport, element.Region, element.ResourceName, vscode.TreeItemCollapsibleState.None, { command: 'GlueTreeView.ShowJobRunsReport', title: 'Show Job Runs Report', arguments: [element] }, element),
 				];
 			}
 			if (element.TreeItemType === TreeItemType.Code) {
