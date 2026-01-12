@@ -5,16 +5,20 @@ import * as api from "../common/API";
 import { CloudWatchLogView } from "../cloudwatch/CloudWatchLogView";
 
 interface JobRunsReportState {
-    isLoading: boolean;
-    error?: string;
-    runs: any[];
+  isLoading: boolean;
+  error?: string;
+  runs: any[];
+  selectedDate?: string;
 }
 
 interface ReportRowView {
   id: string;
   displayId: string;
+    status: string;
+    statusIcon: string;
     start: string;
     end: string;
+    startTime: number;
     duration: string;
     error: string;
     args: string;
@@ -32,7 +36,12 @@ export class JobRunsReportView {
 
     private state: JobRunsReportState = { isLoading: false, runs: [] };
 
-    private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, region: string, jobName: string) {
+    private getTodayDate(): string {
+        const now = new Date();
+        return now.toISOString().split('T')[0];
+    }
+
+    constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, region: string, jobName: string) {
         this.panel = panel;
         this.extensionUri = extensionUri;
         this.region = region;
@@ -93,25 +102,65 @@ export class JobRunsReportView {
     }
 
     private mapRows(): ReportRowView[] {
-        return (this.state.runs || []).map(run => {
-            const startDate = run.StartedOn ? new Date(run.StartedOn) : undefined;
-            const endDate = run.CompletedOn ? new Date(run.CompletedOn) : (run.StoppedOn ? new Date(run.StoppedOn) : undefined);
-            const duration = run.ExecutionTime ? `${run.ExecutionTime}s` : (startDate && endDate ? `${Math.round((endDate.getTime() - startDate.getTime()) / 1000)}s` : "");
-            const args = run.Arguments ? JSON.stringify(run.Arguments) : "";
-            const preview = args.length > 140 ? `${args.substring(0, 140)}…` : args;
-        const id = run.Id || "";
-            return {
-          id,
-          displayId: id ? id.substring(0, 10) : "",
-                start: startDate ? startDate.toLocaleString() : "",
-                end: endDate ? endDate.toLocaleString() : "",
-                duration,
-                error: run.ErrorMessage || "",
-                args: preview,
-                hasOutput: !!run.LogGroupName,
-                hasError: !!run.ErrorLogGroupName,
-            } as ReportRowView;
-        });
+      const selectedDate = this.state.selectedDate;
+      let selectedDateObj: Date | undefined;
+      let nextDayObj: Date | undefined;
+      if (selectedDate) {
+        selectedDateObj = new Date(selectedDate);
+        nextDayObj = new Date(selectedDateObj);
+        nextDayObj.setDate(nextDayObj.getDate() + 1);
+      }
+
+      return (this.state.runs || [])
+        .filter(run => {
+          if (!run.StartedOn) return false;
+          if (selectedDateObj && nextDayObj) {
+            const runDate = new Date(run.StartedOn);
+            return runDate >= selectedDateObj && runDate < nextDayObj;
+          }
+          return true;
+        })
+        .map(run => {
+                const startDate = run.StartedOn ? new Date(run.StartedOn) : undefined;
+                const endDate = run.CompletedOn ? new Date(run.CompletedOn) : (run.StoppedOn ? new Date(run.StoppedOn) : undefined);
+                const duration = run.ExecutionTime ? `${run.ExecutionTime}s` : (startDate && endDate ? `${Math.round((endDate.getTime() - startDate.getTime()) / 1000)}s` : "");
+                const args = run.Arguments ? JSON.stringify(run.Arguments) : "";
+                const preview = args.length > 140 ? `${args.substring(0, 140)}…` : args;
+                const id = run.Id || "";
+                const status = run.JobRunState || "";
+                let statusIcon = "circle-outline";
+                switch (status) {
+                    case "SUCCEEDED":
+                        statusIcon = "pass";
+                        break;
+                    case "FAILED":
+                        statusIcon = "error";
+                        break;
+                    case "RUNNING":
+                        statusIcon = "sync~spin";
+                        break;
+                    case "STOPPED":
+                        statusIcon = "stop";
+                        break;
+                    case "TIMEOUT":
+                        statusIcon = "clock";
+                        break;
+                }
+                return {
+                    id,
+                    displayId: id ? id.substring(0, 10) : "",
+                    status,
+                    statusIcon,
+                    start: startDate ? startDate.toLocaleString() : "",
+                    end: endDate ? endDate.toLocaleString() : "",
+                    startTime: startDate ? startDate.getTime() : 0,
+                    duration,
+                    error: run.ErrorMessage || "",
+                    args: preview,
+                    hasOutput: !!run.LogGroupName,
+                    hasError: !!run.LogGroupName,
+                } as ReportRowView;
+            });
     }
 
     private render() {
@@ -124,6 +173,7 @@ export class JobRunsReportView {
             state: {
                 region: this.region,
                 jobName: this.jobName,
+                selectedDate: this.state.selectedDate,
                 isLoading: this.state.isLoading,
                 error: this.state.error,
                 rows: this.mapRows(),
@@ -138,6 +188,10 @@ export class JobRunsReportView {
                 return;
             case "refresh":
                 await this.loadRuns();
+                return;
+            case "dateChanged":
+              this.state.selectedDate = message.date || undefined;
+                this.sendState();
                 return;
             case "openLogs":
                 await this.openLogs(message.kind as "output" | "error", message.runId as string);
@@ -154,7 +208,7 @@ export class JobRunsReportView {
             return;
         }
         const outputGroup = run.LogGroupName ? `${run.LogGroupName}/output` : undefined;
-        const errorGroup = run.ErrorLogGroupName ? `${run.ErrorLogGroupName}/error` : undefined;
+        const errorGroup = run.LogGroupName ? `${run.LogGroupName}/error` : undefined;
         const group = kind === "output" ? outputGroup : errorGroup;
         if (!group) {
             ui.showInfoMessage("Log group not available for this run");
@@ -180,10 +234,11 @@ export class JobRunsReportView {
   <style>
     :root { --layout-padding: 12px; }
     body { font-family: var(--vscode-font-family); margin: 0; padding: var(--layout-padding); color: var(--vscode-foreground); }
-    .header { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+    .header { display: flex; align-items: center; justify-content: flex-start; gap: 8px; flex-wrap: wrap; }
     .title { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; }
-    .badge { padding: 2px 6px; border-radius: 4px; background: var(--vscode-editor-inactiveSelectionBackground); }
-    .controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .badge { display: inline-flex; align-items: center; justify-content: flex-start; padding: 2px 6px; border-radius: 4px; background: var(--vscode-editor-inactiveSelectionBackground); }
+    .controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-left: auto; }
+    .controls-group { display: flex; gap: 8px; align-items: center; }
     .spinner { display: inline-flex; align-items: center; gap: 6px; }
     .spinner .codicon { animation: spin 1s linear infinite; }
     @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
@@ -206,6 +261,10 @@ export class JobRunsReportView {
       <span class="badge" id="job"></span>
     </div>
     <div class="controls">
+      <div class="controls-group">
+        <label for="dateInput" style="margin: 0; display: flex; align-items: center; gap: 4px;"><span class="codicon codicon-calendar"></span>Date:</label>
+        <input id="dateInput" type="date" style="padding: 4px 6px; border: 1px solid var(--vscode-input-border); background: var(--vscode-input-background); color: var(--vscode-input-foreground); border-radius: 2px; font-size: 12px;" />
+      </div>
       <vscode-button id="refresh" appearance="secondary"><span class="codicon codicon-refresh"></span>Refresh</vscode-button>
       <span class="spinner" id="spinner" style="display:none;"><span class="codicon codicon-sync"></span>Loading...</span>
     </div>
@@ -238,14 +297,25 @@ export class JobRunsReportView {
     const emptyEl = document.getElementById('empty');
     const regionEl = document.getElementById('region');
     const jobEl = document.getElementById('job');
+    const dateInput = document.getElementById('dateInput');
 
     document.getElementById('refresh').addEventListener('click', () => {
       vscode.postMessage({ command: 'refresh' });
     });
 
+    dateInput.addEventListener('change', () => {
+      vscode.postMessage({ command: 'dateChanged', date: dateInput.value });
+    });
+
     function render(state) {
       regionEl.textContent = state.region ? 'Region: ' + state.region : '';
       jobEl.textContent = state.jobName ? 'Job: ' + state.jobName : '';
+      if (state.selectedDate && dateInput.value !== state.selectedDate) {
+        dateInput.value = state.selectedDate;
+      }
+      if (!state.selectedDate && dateInput.value) {
+        dateInput.value = '';
+      }
       spinnerEl.style.display = state.isLoading ? 'inline-flex' : 'none';
       errorEl.style.display = state.error ? 'block' : 'none';
       errorEl.textContent = state.error || '';
@@ -258,7 +328,15 @@ export class JobRunsReportView {
         const tr = document.createElement('tr');
 
         const idTd = document.createElement('td');
-        idTd.textContent = row.displayId || row.id;
+        const iconSpan = document.createElement('span');
+        const iconClass = 'codicon codicon-' + row.statusIcon;
+        iconSpan.setAttribute('class', iconClass);
+        iconSpan.style.marginRight = '6px';
+        iconSpan.title = row.status;
+        idTd.appendChild(iconSpan);
+        const idSpan = document.createElement('span');
+        idSpan.textContent = row.displayId || row.id;
+        idTd.appendChild(idSpan);
         tr.appendChild(idTd);
 
         const startTd = document.createElement('td');
