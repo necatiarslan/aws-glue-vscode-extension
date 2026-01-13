@@ -35,11 +35,17 @@ export class GlueTreeDataProvider implements vscode.TreeDataProvider<GlueTreeIte
 				];
 			}
 			if (element.TreeItemType === TreeItemType.Code) {
+			let result: GlueTreeItem[] = [];
 			const codePath = GlueTreeView.Current.JobCodePaths[element.ResourceName];
 			if (codePath) {
-				return [new GlueTreeItem(codePath, TreeItemType.Detail, element.Region, "", vscode.TreeItemCollapsibleState.None, undefined, element)];
+				result.push(new GlueTreeItem(codePath, TreeItemType.Detail, element.Region, "", vscode.TreeItemCollapsibleState.None, undefined, element));
 			}
-			return [];
+			const jobInfo = await GlueTreeView.Current.getJobInfo(element.ResourceName, element.Region);
+			const scriptLocation = jobInfo?.Command?.ScriptLocation as string | undefined;
+			if (scriptLocation) {
+				result.push(new GlueTreeItem(scriptLocation, TreeItemType.Detail, element.Region, "", vscode.TreeItemCollapsibleState.None, undefined, element));
+			}
+			return result;
 		}
 		if (element.TreeItemType === TreeItemType.Trigger) {
 			const triggerFiles = GlueTreeView.Current.JobTriggerFiles[element.ResourceName] || [];
@@ -48,7 +54,8 @@ export class GlueTreeDataProvider implements vscode.TreeDataProvider<GlueTreeIte
 				new GlueTreeItem("Without Payload", TreeItemType.TriggerWithoutPayload, element.Region, element.ResourceName, vscode.TreeItemCollapsibleState.None, { command: 'GlueTreeView.TriggerWithoutPayload', title: 'Trigger Without Payload', arguments: [element] }, element),
 			];
 			for (const filePath of triggerFiles) {
-				children.push(new GlueTreeItem(filePath, TreeItemType.TriggerFile, element.Region, element.ResourceName, vscode.TreeItemCollapsibleState.None, { command: 'GlueTreeView.TriggerFromFile', title: 'Trigger From File', arguments: [{ jobName: element.ResourceName, region: element.Region, filePath }] }, element, { filePath }));
+				const fileName = filePath.split('/').pop() || filePath;
+				children.push(new GlueTreeItem(fileName, TreeItemType.TriggerFile, element.Region, element.ResourceName, vscode.TreeItemCollapsibleState.None, { command: 'GlueTreeView.TriggerFromFile', title: 'Trigger From File', arguments: [{ jobName: element.ResourceName, region: element.Region, filePath }] }, element, { filePath }));
 			}
 			return children;
 		}

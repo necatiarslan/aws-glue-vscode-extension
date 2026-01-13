@@ -227,6 +227,16 @@
         "icon": "$(info)"
       },
       {
+        "command": "GlueTreeView.OpenJobCode",
+        "title": "Open Job Code",
+        "icon": "$(go-to-file)"
+      },
+      {
+        "command": "GlueTreeView.DiffJobCode",
+        "title": "Diff Job Code",
+        "icon": "$(diff)"
+      },
+      {
         "command": "GlueTreeView.BugAndNewFeature",
         "title": "Bug and New Feature",
         "icon": "$(issues)"
@@ -393,6 +403,16 @@
         },
         {
           "command": "GlueTreeView.UnsetJobCode",
+          "when": "view == GlueTreeView && viewItem == Code",
+          "group": "inline"
+        },
+        {
+          "command": "GlueTreeView.OpenJobCode",
+          "when": "view == GlueTreeView && viewItem == Code",
+          "group": "inline"
+        },
+        {
+          "command": "GlueTreeView.DiffJobCode",
           "when": "view == GlueTreeView && viewItem == Code",
           "group": "inline"
         },

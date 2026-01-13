@@ -284,7 +284,7 @@ export class GlueTreeView {
 		return { bucket: match[1], key: match[2] };
 	}
 
-	private async getJobInfo(jobName: string, region: string) {
+	public async getJobInfo(jobName: string, region: string) {
 		if(!this.JobInfoCache[jobName]) {
 			const result = await api.GetGlueJobDescription(region, jobName);
 			if(!result.isSuccessful) {
@@ -431,38 +431,8 @@ export class GlueTreeView {
 	async TriggerWithPayload(node: GlueTreeItem) {
 		if (node.TreeItemType !== TreeItemType.TriggerWithPayload) { return; }
 
-		const jobName = node.Parent?.ResourceName;
-		if (!jobName) {
-			ui.showErrorMessage('Unable to start run: missing job name', new Error('missing job name'));
-			return;
-		}
+		JobRunView.Render(this.context.extensionUri, node.Region, node.ResourceName);
 
-		const payloadText = await vscode.window.showInputBox({
-			prompt: 'Enter JSON payload for job run Arguments',
-			placeHolder: '{"--key":"value"}',
-			value: '{}'
-		});
-		if (payloadText === undefined) { return; }
-
-		let args: any = undefined;
-		try {
-			args = payloadText ? JSON.parse(payloadText) : undefined;
-		} catch (err: any) {
-			ui.showErrorMessage('Invalid JSON payload', err);
-			return;
-		}
-
-		try {
-			ui.logToOutput(`Starting Glue job ${jobName} with payload`);
-			const result = await api.StartGlueJobRun(node.Region, jobName, args);
-			if (!result.isSuccessful) {
-				ui.showErrorMessage('Start job run failed', result.error);
-				return;
-			}
-			ui.showInfoMessage(`Job run started. Run id: ${result.result}`);
-		} catch (error: any) {
-			ui.showErrorMessage('Start job run error', error);
-		}
 	}
 	async TriggerWithoutPayload(node: GlueTreeItem) {
 		if (node.TreeItemType !== TreeItemType.TriggerWithoutPayload) { return; }
@@ -527,5 +497,69 @@ async RemoveTriggerFile(jobName: string, filePath: string) {
 
 async TriggerFromFile(node: GlueTreeItem) {
 	JobRunView.Render(this.context.extensionUri, node.Region, node.ResourceName, node.Payload?.filePath);
+}
+
+async OpenJobCode(node: GlueTreeItem) {
+	if(node.TreeItemType !== TreeItemType.Code) return;
+
+	try {
+		const jobName = node.ResourceName;
+		const codePath = this.JobCodePaths[jobName];
+		
+		if(!codePath) {
+			ui.showInfoMessage('No code path set. Please use "Set Code" first to select a file.');
+			return;
+		}
+
+		const fileUri = vscode.Uri.file(codePath);
+		const document = await vscode.workspace.openTextDocument(fileUri);
+		await vscode.window.showTextDocument(document);
+	} catch (error: any) {
+		ui.showErrorMessage('Open job code error', error);
+	}
+}
+
+async DiffJobCode(node: GlueTreeItem) {
+	if(node.TreeItemType !== TreeItemType.Code) return;
+
+	try {
+		const jobName = node.ResourceName;
+		const codePath = this.JobCodePaths[jobName];
+		
+		if(!codePath) {
+			ui.showInfoMessage('No code path set. Please use "Set Code" first to select a file.');
+			return;
+		}
+
+		const jobInfo = await this.getJobInfo(jobName, node.Region);
+		const scriptLocation = jobInfo?.Command?.ScriptLocation as string | undefined;
+		if(!scriptLocation) {
+			ui.showInfoMessage('Script location not found in job');
+			return;
+		}
+
+		const { bucket, key } = this.parseS3Location(scriptLocation);
+		
+		ui.logToOutput(`Downloading Glue job code from ${scriptLocation} for diff`);
+		const result = await api.DownloadS3Object(node.Region, bucket, key);
+		if(!result.isSuccessful) {
+			ui.showErrorMessage('Download job code failed', result.error);
+			return;
+		}
+
+		const tempDir = this.context.globalStorageUri.fsPath;
+		const tempFileName = `${jobName}_s3.${key.split('.').pop() || 'txt'}`;
+		const tempPath = join(tempDir, tempFileName);
+		const tempUri = vscode.Uri.file(tempPath);
+		
+		await vscode.workspace.fs.writeFile(tempUri, Buffer.from(result.result));
+		
+		const localUri = vscode.Uri.file(codePath);
+		const title = `${basename(codePath)} (local) ↔ ${basename(key)} (S3)`;
+		
+		await vscode.commands.executeCommand('vscode.diff', localUri, tempUri, title);
+	} catch (error: any) {
+		ui.showErrorMessage('Diff job code error', error);
+	}
 }
 }

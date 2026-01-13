@@ -413,39 +413,7 @@ class GlueTreeView {
         if (node.TreeItemType !== GlueTreeItem_1.TreeItemType.TriggerWithPayload) {
             return;
         }
-        const jobName = node.Parent?.ResourceName;
-        if (!jobName) {
-            ui.showErrorMessage('Unable to start run: missing job name', new Error('missing job name'));
-            return;
-        }
-        const payloadText = await vscode.window.showInputBox({
-            prompt: 'Enter JSON payload for job run Arguments',
-            placeHolder: '{"--key":"value"}',
-            value: '{}'
-        });
-        if (payloadText === undefined) {
-            return;
-        }
-        let args = undefined;
-        try {
-            args = payloadText ? JSON.parse(payloadText) : undefined;
-        }
-        catch (err) {
-            ui.showErrorMessage('Invalid JSON payload', err);
-            return;
-        }
-        try {
-            ui.logToOutput(`Starting Glue job ${jobName} with payload`);
-            const result = await api.StartGlueJobRun(node.Region, jobName, args);
-            if (!result.isSuccessful) {
-                ui.showErrorMessage('Start job run failed', result.error);
-                return;
-            }
-            ui.showInfoMessage(`Job run started. Run id: ${result.result}`);
-        }
-        catch (error) {
-            ui.showErrorMessage('Start job run error', error);
-        }
+        JobRunView_1.JobRunView.Render(this.context.extensionUri, node.Region, node.ResourceName);
     }
     async TriggerWithoutPayload(node) {
         if (node.TreeItemType !== GlueTreeItem_1.TreeItemType.TriggerWithoutPayload) {
@@ -513,6 +481,60 @@ class GlueTreeView {
     }
     async TriggerFromFile(node) {
         JobRunView_1.JobRunView.Render(this.context.extensionUri, node.Region, node.ResourceName, node.Payload?.filePath);
+    }
+    async OpenJobCode(node) {
+        if (node.TreeItemType !== GlueTreeItem_1.TreeItemType.Code)
+            return;
+        try {
+            const jobName = node.ResourceName;
+            const codePath = this.JobCodePaths[jobName];
+            if (!codePath) {
+                ui.showInfoMessage('No code path set. Please use "Set Code" first to select a file.');
+                return;
+            }
+            const fileUri = vscode.Uri.file(codePath);
+            const document = await vscode.workspace.openTextDocument(fileUri);
+            await vscode.window.showTextDocument(document);
+        }
+        catch (error) {
+            ui.showErrorMessage('Open job code error', error);
+        }
+    }
+    async DiffJobCode(node) {
+        if (node.TreeItemType !== GlueTreeItem_1.TreeItemType.Code)
+            return;
+        try {
+            const jobName = node.ResourceName;
+            const codePath = this.JobCodePaths[jobName];
+            if (!codePath) {
+                ui.showInfoMessage('No code path set. Please use "Set Code" first to select a file.');
+                return;
+            }
+            const jobInfo = await this.getJobInfo(jobName, node.Region);
+            const scriptLocation = jobInfo?.Command?.ScriptLocation;
+            if (!scriptLocation) {
+                ui.showInfoMessage('Script location not found in job');
+                return;
+            }
+            const { bucket, key } = this.parseS3Location(scriptLocation);
+            ui.logToOutput(`Downloading Glue job code from ${scriptLocation} for diff`);
+            const result = await api.DownloadS3Object(node.Region, bucket, key);
+            if (!result.isSuccessful) {
+                ui.showErrorMessage('Download job code failed', result.error);
+                return;
+            }
+            const tempDir = this.context.globalStorageUri.fsPath;
+            const tempFileName = `${jobName}_s3.${key.split('.').pop() || 'txt'}`;
+            const tempPath = (0, path_1.join)(tempDir, tempFileName);
+            const tempUri = vscode.Uri.file(tempPath);
+            await vscode.workspace.fs.writeFile(tempUri, Buffer.from(result.result));
+            const localUri = vscode.Uri.file(codePath);
+            const title = `${(0, path_1.basename)(codePath)} (local) ↔ ${(0, path_1.basename)(key)} (S3)`;
+            await vscode.commands.executeCommand('vscode.diff', localUri, tempUri, title);
+        }
+        catch (error) {
+            ui.showErrorMessage('Diff job code error', error);
+        }
     }
 }
 exports.GlueTreeView = GlueTreeView;
