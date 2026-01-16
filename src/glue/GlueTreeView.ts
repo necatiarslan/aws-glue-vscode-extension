@@ -20,7 +20,7 @@ export class GlueTreeView {
 	public isShowHiddenNodes: boolean = false;
 	public AwsProfile: string = "default";	
 	public AwsEndPoint: string | undefined;
-	public ResourceList: {Region: string, Name: string, Type: string}[] = [];
+	public ResourceList: {Region: string, Name: string, Type: string, IsFav?: boolean, IsHidden?: boolean}[] = [];
 	public JobRunsCache: {[key: string]: any[]} = {};
 	public LogStreamsCache: {[key: string]: string[]} = {};
 	public JobInfoCache: {[key: string]: any} = {};
@@ -35,6 +35,7 @@ export class GlueTreeView {
 		this.view = vscode.window.createTreeView('GlueTreeView', { treeDataProvider: this.treeDataProvider, showCollapseAll: true });
 		this.Refresh();
 		context.subscriptions.push(this.view);
+		this.SetFilterMessage();
 	}
 
 	async TestAwsConnection(){
@@ -76,23 +77,39 @@ export class GlueTreeView {
 	}
 
 	async AddToFav(node: GlueTreeItem) {
-		node.IsFav = true;
+		const resource = this.ResourceList.find(r => r.Region === node.Region && r.Name === node.ResourceName);
+		if (resource) {
+			resource.IsFav = true;
+		}
 		this.treeDataProvider.Refresh();
+		this.SaveState();
 	}
 
 	async HideNode(node: GlueTreeItem) {
-		node.IsHidden = true;
+		const resource = this.ResourceList.find(r => r.Region === node.Region && r.Name === node.ResourceName);
+		if (resource) {
+			resource.IsHidden = true;
+		}
 		this.treeDataProvider.Refresh();
+		this.SaveState();
 	}
 
 	async UnHideNode(node: GlueTreeItem) {
-		node.IsHidden = false;
+		const resource = this.ResourceList.find(r => r.Region === node.Region && r.Name === node.ResourceName);
+		if (resource) {
+			resource.IsHidden = false;
+		}
 		this.treeDataProvider.Refresh();
+		this.SaveState();
 	}
 
 	async DeleteFromFav(node: GlueTreeItem) {
-		node.IsFav = false;
+		const resource = this.ResourceList.find(r => r.Region === node.Region && r.Name === node.ResourceName);
+		if (resource) {
+			resource.IsFav = false;
+		}
 		this.treeDataProvider.Refresh();
+		this.SaveState();
 	}
 
 	async Filter() {
@@ -101,18 +118,39 @@ export class GlueTreeView {
 		this.FilterString = filterStringTemp;
 		this.treeDataProvider.Refresh();
 		this.SaveState();
+		this.SetFilterMessage();
 	}
 
 	async ShowOnlyFavorite() {
 		this.isShowOnlyFavorite = !this.isShowOnlyFavorite;
 		this.treeDataProvider.Refresh();
 		this.SaveState();
+		this.SetFilterMessage();
 	}
 
 	async ShowHiddenNodes() {
 		this.isShowHiddenNodes = !this.isShowHiddenNodes;
 		this.treeDataProvider.Refresh();
 		this.SaveState();
+		this.SetFilterMessage();
+	}
+
+	GetBoolenSign(value: boolean): string {
+		return value ? "✓ " : "✗ ";
+	}
+
+	async SetFilterMessage() {
+		if (this.ResourceList.length > 0) {
+			this.view.message = 
+				await this.GetFilterProfilePrompt()
+				+ this.GetBoolenSign(this.isShowOnlyFavorite) + "Fav, " 
+				+ this.GetBoolenSign(this.isShowHiddenNodes) + "Hidden, "
+				+ (this.FilterString ? `Filter: ${this.FilterString}` : "");
+		}
+	}
+
+	async GetFilterProfilePrompt() {
+		return "Profile:" + this.AwsProfile + " ";
 	}
 
 	SaveState() {
@@ -189,6 +227,7 @@ export class GlueTreeView {
 
 		this.AwsProfile = selectedAwsProfile;
 		this.SaveState();
+		this.SetFilterMessage();
 	}
 
 	async UpdateAwsEndPoint() {

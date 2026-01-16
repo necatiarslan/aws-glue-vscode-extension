@@ -2,7 +2,7 @@
   "name": "aws-glue-vscode-extension",
   "displayName": "Aws Glue",
   "description": "Update, Trigger & Monitor your Aws Glue Jobs",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "publisher": "NecatiARSLAN",
   "repository": {
     "type": "git",

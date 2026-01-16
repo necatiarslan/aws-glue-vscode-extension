@@ -149,7 +149,17 @@ export class GlueTreeDataProvider implements vscode.TreeDataProvider<GlueTreeIte
 				if (type !== TreeItemType.Job) {
 					type = TreeItemType.Job; // Migration: default to Job
 				}
-				items.push(new GlueTreeItem(res.Name, type, res.Region, res.Name, vscode.TreeItemCollapsibleState.Collapsed));
+				let item = new GlueTreeItem(res.Name, type, res.Region, res.Name, vscode.TreeItemCollapsibleState.Collapsed);
+				
+				// Set IsFav and IsHidden from resource list
+				item.IsFav = res.IsFav || false;
+				item.IsHidden = res.IsHidden || false;
+				
+				// Apply favorite and hidden filters
+				if (GlueTreeView.Current.isShowOnlyFavorite && !item.IsFav) continue;
+				if (!GlueTreeView.Current.isShowHiddenNodes && item.IsHidden) continue;
+				
+				items.push(item);
 			}
 
 			return items;

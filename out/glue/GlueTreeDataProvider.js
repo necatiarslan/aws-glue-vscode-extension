@@ -145,7 +145,16 @@ class GlueTreeDataProvider {
                 if (type !== GlueTreeItem_1.TreeItemType.Job) {
                     type = GlueTreeItem_1.TreeItemType.Job; // Migration: default to Job
                 }
-                items.push(new GlueTreeItem_1.GlueTreeItem(res.Name, type, res.Region, res.Name, vscode.TreeItemCollapsibleState.Collapsed));
+                let item = new GlueTreeItem_1.GlueTreeItem(res.Name, type, res.Region, res.Name, vscode.TreeItemCollapsibleState.Collapsed);
+                // Set IsFav and IsHidden from resource list
+                item.IsFav = res.IsFav || false;
+                item.IsHidden = res.IsHidden || false;
+                // Apply favorite and hidden filters
+                if (GlueTreeView_1.GlueTreeView.Current.isShowOnlyFavorite && !item.IsFav)
+                    continue;
+                if (!GlueTreeView_1.GlueTreeView.Current.isShowHiddenNodes && item.IsHidden)
+                    continue;
+                items.push(item);
             }
             return items;
         }

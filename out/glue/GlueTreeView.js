@@ -35,6 +35,7 @@ class GlueTreeView {
         this.view = vscode.window.createTreeView('GlueTreeView', { treeDataProvider: this.treeDataProvider, showCollapseAll: true });
         this.Refresh();
         context.subscriptions.push(this.view);
+        this.SetFilterMessage();
     }
     async TestAwsConnection() {
         let response = await api.TestAwsCredentials();
@@ -74,20 +75,36 @@ class GlueTreeView {
         });
     }
     async AddToFav(node) {
-        node.IsFav = true;
+        const resource = this.ResourceList.find(r => r.Region === node.Region && r.Name === node.ResourceName);
+        if (resource) {
+            resource.IsFav = true;
+        }
         this.treeDataProvider.Refresh();
+        this.SaveState();
     }
     async HideNode(node) {
-        node.IsHidden = true;
+        const resource = this.ResourceList.find(r => r.Region === node.Region && r.Name === node.ResourceName);
+        if (resource) {
+            resource.IsHidden = true;
+        }
         this.treeDataProvider.Refresh();
+        this.SaveState();
     }
     async UnHideNode(node) {
-        node.IsHidden = false;
+        const resource = this.ResourceList.find(r => r.Region === node.Region && r.Name === node.ResourceName);
+        if (resource) {
+            resource.IsHidden = false;
+        }
         this.treeDataProvider.Refresh();
+        this.SaveState();
     }
     async DeleteFromFav(node) {
-        node.IsFav = false;
+        const resource = this.ResourceList.find(r => r.Region === node.Region && r.Name === node.ResourceName);
+        if (resource) {
+            resource.IsFav = false;
+        }
         this.treeDataProvider.Refresh();
+        this.SaveState();
     }
     async Filter() {
         let filterStringTemp = await vscode.window.showInputBox({ value: this.FilterString, placeHolder: 'Enter Your Filter Text' });
@@ -97,16 +114,34 @@ class GlueTreeView {
         this.FilterString = filterStringTemp;
         this.treeDataProvider.Refresh();
         this.SaveState();
+        this.SetFilterMessage();
     }
     async ShowOnlyFavorite() {
         this.isShowOnlyFavorite = !this.isShowOnlyFavorite;
         this.treeDataProvider.Refresh();
         this.SaveState();
+        this.SetFilterMessage();
     }
     async ShowHiddenNodes() {
         this.isShowHiddenNodes = !this.isShowHiddenNodes;
         this.treeDataProvider.Refresh();
         this.SaveState();
+        this.SetFilterMessage();
+    }
+    GetBoolenSign(value) {
+        return value ? "✓ " : "✗ ";
+    }
+    async SetFilterMessage() {
+        if (this.ResourceList.length > 0) {
+            this.view.message =
+                await this.GetFilterProfilePrompt()
+                    + this.GetBoolenSign(this.isShowOnlyFavorite) + "Fav, "
+                    + this.GetBoolenSign(this.isShowHiddenNodes) + "Hidden, "
+                    + (this.FilterString ? `Filter: ${this.FilterString}` : "");
+        }
+    }
+    async GetFilterProfilePrompt() {
+        return "Profile:" + this.AwsProfile + " ";
     }
     SaveState() {
         try {
@@ -183,6 +218,7 @@ class GlueTreeView {
         }
         this.AwsProfile = selectedAwsProfile;
         this.SaveState();
+        this.SetFilterMessage();
     }
     async UpdateAwsEndPoint() {
         let awsEndPointUrl = await vscode.window.showInputBox({ placeHolder: 'Enter Aws End Point URL (Leave Empty To Return To Default)' });
