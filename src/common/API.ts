@@ -3,7 +3,7 @@ import { fromNodeProviderChain } from "@aws-sdk/credential-providers";
 import { GlueClient, GetJobCommand, GetJobsCommand, StartJobRunCommand, GetJobRunCommand, GetJobRunsCommand, BatchStopJobRunCommand } from "@aws-sdk/client-glue";
 import { S3Client, GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import { CloudWatchLogsClient, OutputLogEvent, DescribeLogStreamsCommand, GetLogEventsCommand, DescribeLogGroupsCommand } from "@aws-sdk/client-cloudwatch-logs";
-import { STSClient, GetCallerIdentityCommand } from "@aws-sdk/client-sts";
+import { STSClient, GetCallerIdentityCommand, GetCallerIdentityCommandOutput } from "@aws-sdk/client-sts";
 import * as ui from "./UI";
 import { MethodResult } from './MethodResult';
 import { homedir } from "os";
@@ -145,16 +145,21 @@ export async function GetLatestLogGroupLogStreamList(Region: string, LogGroupNam
   result.result = [];
   try {
     const cloudwatchlogs = await GetCloudWatchClient(Region);
-    const describeLogStreamsCommand = new DescribeLogStreamsCommand({
-      logGroupName: LogGroupName,
-      orderBy: "LastEventTime",
-      descending: true,
-      limit: 30,
-    });
-    const streamsResponse = await cloudwatchlogs.send(describeLogStreamsCommand);
-    if (streamsResponse.logStreams) {
-      result.result = streamsResponse.logStreams.map(stream => stream.logStreamName || 'invalid log stream');
-    }
+    let nextToken: string | undefined = undefined;
+    do {
+      const describeLogStreamsCommand: DescribeLogStreamsCommand = new DescribeLogStreamsCommand({
+        logGroupName: LogGroupName,
+        orderBy: "LastEventTime",
+        descending: true,
+        limit: 50,
+        nextToken: nextToken,
+      });
+      const streamsResponse = await cloudwatchlogs.send(describeLogStreamsCommand);
+      if (streamsResponse.logStreams) {
+        result.result.push(...streamsResponse.logStreams.map((stream: any) => stream.logStreamName || 'invalid log stream'));
+      }
+      nextToken = streamsResponse.nextToken as string | undefined;
+    } while (nextToken);
     result.isSuccessful = true;
     return result;
   } catch (error: any) {
@@ -169,16 +174,21 @@ export async function GetLogEvents(Region: string, LogGroupName: string, LogStre
   result.result = [];
   try {
     const cloudwatchlogs = await GetCloudWatchClient(Region);
-    const getLogEventsCommand = new GetLogEventsCommand({
-      logGroupName: LogGroupName,
-      logStreamName: LogStreamName,
-      limit: 50,
-      startFromHead: true,
-    });
-    const eventsResponse = await cloudwatchlogs.send(getLogEventsCommand);
-    if (eventsResponse.events) {
-      result.result = eventsResponse.events;
-    }
+    let nextToken: string | undefined = undefined;
+    do {
+      const getLogEventsCommand: GetLogEventsCommand = new GetLogEventsCommand({
+        logGroupName: LogGroupName,
+        logStreamName: LogStreamName,
+        limit: 50,
+        startFromHead: true,
+        nextToken: nextToken,
+      });
+      const eventsResponse = await cloudwatchlogs.send(getLogEventsCommand);
+      if (eventsResponse.events) {
+        result.result.push(...eventsResponse.events);
+      }
+      nextToken = eventsResponse.nextForwardToken as string | undefined;
+    } while (nextToken);
     result.isSuccessful = true;
     return result;
   } catch (error: any) {
@@ -202,14 +212,14 @@ export async function TestAwsCredentials(): Promise<MethodResult<boolean>> {
   }
 }
 
-export async function TestAwsConnection(Region: string="us-east-1"): Promise<MethodResult<boolean>> {
-  let result: MethodResult<boolean> = new MethodResult<boolean>();
+export async function TestAwsConnection(Region: string="us-east-1"): Promise<MethodResult<GetCallerIdentityCommandOutput>> {
+  let result: MethodResult<GetCallerIdentityCommandOutput> = new MethodResult<GetCallerIdentityCommandOutput>();
   try {
     const sts = await GetSTSClient(Region);
     const command = new GetCallerIdentityCommand({});
-    await sts.send(command);
+    const response = await sts.send(command);
     result.isSuccessful = true;
-    result.result = true;
+    result.result = response;
     return result;
   } catch (error: any) {
     result.isSuccessful = false;
@@ -262,11 +272,15 @@ export async function GetGlueJobRuns(region: string, jobName: string): Promise<M
   result.result = [];
   try {
     const glue = await GetGlueClient(region);
-    const cmd = new GetJobRunsCommand({ JobName: jobName, MaxResults: 20 });
-    const res = await glue.send(cmd);
-    if (res.JobRuns) {
-      result.result = res.JobRuns;
-    }
+    let nextToken: string | undefined = undefined;
+    do {
+      const cmd: GetJobRunsCommand = new GetJobRunsCommand({ JobName: jobName, MaxResults: 100, NextToken: nextToken });
+      const res = await glue.send(cmd);
+      if (res.JobRuns) {
+        result.result.push(...res.JobRuns);
+      }
+      nextToken = res.NextToken as string | undefined;
+    } while (nextToken);
     result.isSuccessful = true;
     return result;
   } catch (error: any) {

@@ -155,16 +155,21 @@ async function GetLatestLogGroupLogStreamList(Region, LogGroupName) {
     result.result = [];
     try {
         const cloudwatchlogs = await GetCloudWatchClient(Region);
-        const describeLogStreamsCommand = new client_cloudwatch_logs_1.DescribeLogStreamsCommand({
-            logGroupName: LogGroupName,
-            orderBy: "LastEventTime",
-            descending: true,
-            limit: 30,
-        });
-        const streamsResponse = await cloudwatchlogs.send(describeLogStreamsCommand);
-        if (streamsResponse.logStreams) {
-            result.result = streamsResponse.logStreams.map(stream => stream.logStreamName || 'invalid log stream');
-        }
+        let nextToken = undefined;
+        do {
+            const describeLogStreamsCommand = new client_cloudwatch_logs_1.DescribeLogStreamsCommand({
+                logGroupName: LogGroupName,
+                orderBy: "LastEventTime",
+                descending: true,
+                limit: 50,
+                nextToken: nextToken,
+            });
+            const streamsResponse = await cloudwatchlogs.send(describeLogStreamsCommand);
+            if (streamsResponse.logStreams) {
+                result.result.push(...streamsResponse.logStreams.map((stream) => stream.logStreamName || 'invalid log stream'));
+            }
+            nextToken = streamsResponse.nextToken;
+        } while (nextToken);
         result.isSuccessful = true;
         return result;
     }
@@ -179,16 +184,21 @@ async function GetLogEvents(Region, LogGroupName, LogStreamName) {
     result.result = [];
     try {
         const cloudwatchlogs = await GetCloudWatchClient(Region);
-        const getLogEventsCommand = new client_cloudwatch_logs_1.GetLogEventsCommand({
-            logGroupName: LogGroupName,
-            logStreamName: LogStreamName,
-            limit: 50,
-            startFromHead: true,
-        });
-        const eventsResponse = await cloudwatchlogs.send(getLogEventsCommand);
-        if (eventsResponse.events) {
-            result.result = eventsResponse.events;
-        }
+        let nextToken = undefined;
+        do {
+            const getLogEventsCommand = new client_cloudwatch_logs_1.GetLogEventsCommand({
+                logGroupName: LogGroupName,
+                logStreamName: LogStreamName,
+                limit: 50,
+                startFromHead: true,
+                nextToken: nextToken,
+            });
+            const eventsResponse = await cloudwatchlogs.send(getLogEventsCommand);
+            if (eventsResponse.events) {
+                result.result.push(...eventsResponse.events);
+            }
+            nextToken = eventsResponse.nextForwardToken;
+        } while (nextToken);
         result.isSuccessful = true;
         return result;
     }
@@ -217,9 +227,9 @@ async function TestAwsConnection(Region = "us-east-1") {
     try {
         const sts = await GetSTSClient(Region);
         const command = new client_sts_1.GetCallerIdentityCommand({});
-        await sts.send(command);
+        const response = await sts.send(command);
         result.isSuccessful = true;
-        result.result = true;
+        result.result = response;
         return result;
     }
     catch (error) {
@@ -279,11 +289,15 @@ async function GetGlueJobRuns(region, jobName) {
     result.result = [];
     try {
         const glue = await GetGlueClient(region);
-        const cmd = new client_glue_1.GetJobRunsCommand({ JobName: jobName, MaxResults: 20 });
-        const res = await glue.send(cmd);
-        if (res.JobRuns) {
-            result.result = res.JobRuns;
-        }
+        let nextToken = undefined;
+        do {
+            const cmd = new client_glue_1.GetJobRunsCommand({ JobName: jobName, MaxResults: 100, NextToken: nextToken });
+            const res = await glue.send(cmd);
+            if (res.JobRuns) {
+                result.result.push(...res.JobRuns);
+            }
+            nextToken = res.NextToken;
+        } while (nextToken);
         result.isSuccessful = true;
         return result;
     }

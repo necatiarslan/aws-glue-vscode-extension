@@ -48,12 +48,13 @@ class GlueTreeView {
         if (selectedRegion === undefined) {
             return;
         }
-        response = await api.TestAwsConnection(selectedRegion);
-        if (response.isSuccessful && response.result) {
+        let response_conn = await api.TestAwsConnection(selectedRegion);
+        if (response_conn.isSuccessful && response_conn.result) {
             ui.showInfoMessage('Aws Connection Test Successfull');
+            ui.logToOutput(`Aws AccountId: ${response_conn.result.Account}, UserId: ${response_conn.result.UserId}, Arn: ${response_conn.result.Arn}`);
         }
         else {
-            ui.showErrorMessage('Aws Connection Test Error !!!', response.error);
+            ui.showErrorMessage('Aws Connection Test Error !!!', response_conn.error);
         }
     }
     BugAndNewFeature() {
