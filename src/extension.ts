@@ -40,6 +40,14 @@ export function activate(context: vscode.ExtensionContext) {
 		treeView.ShowHiddenNodes();
 	});
 
+	vscode.commands.registerCommand('GlueTreeView.ShowOnlyInThisProfile', (node: GlueTreeItem) => {
+		treeView.ShowOnlyInThisProfile(node);
+	});
+
+	vscode.commands.registerCommand('GlueTreeView.ShowInAnyProfile', (node: GlueTreeItem) => {
+		treeView.ShowInAnyProfile(node);
+	});
+
 	vscode.commands.registerCommand('GlueTreeView.AddToFav', (node: GlueTreeItem) => {
 		treeView.AddToFav(node);
 	});

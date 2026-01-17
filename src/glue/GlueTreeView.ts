@@ -20,7 +20,7 @@ export class GlueTreeView {
 	public isShowHiddenNodes: boolean = false;
 	public AwsProfile: string = "default";	
 	public AwsEndPoint: string | undefined;
-	public ResourceList: {Region: string, Name: string, Type: string, IsFav?: boolean, IsHidden?: boolean}[] = [];
+	public ResourceList: {Region: string, Name: string, Type: string, IsFav?: boolean, IsHidden?: boolean, Profile?: string}[] = [];
 	public JobRunsCache: {[key: string]: any[]} = {};
 	public LogStreamsCache: {[key: string]: string[]} = {};
 	public JobInfoCache: {[key: string]: any} = {};
@@ -135,6 +135,24 @@ export class GlueTreeView {
 		this.SetFilterMessage();
 	}
 
+	async ShowOnlyInThisProfile(node: GlueTreeItem) {
+		const resource = this.ResourceList.find(r => r.Region === node.Region && r.Name === node.ResourceName);
+		if (resource) {
+			resource.Profile = this.AwsProfile;
+		}
+		this.treeDataProvider.Refresh();
+		this.SaveState();
+	}
+
+	async ShowInAnyProfile(node: GlueTreeItem) {
+		const resource = this.ResourceList.find(r => r.Region === node.Region && r.Name === node.ResourceName);
+		if (resource) {
+			resource.Profile = undefined;
+		}
+		this.treeDataProvider.Refresh();
+		this.SaveState();
+	}
+
 	GetBoolenSign(value: boolean): string {
 		return value ? "✓ " : "✗ ";
 	}
@@ -195,7 +213,7 @@ export class GlueTreeView {
 
 		for(var name of selectedResourceList)
 		{
-			this.treeDataProvider.AddResource(selectedRegion, name, 'Job');
+			this.treeDataProvider.AddResource(selectedRegion, name, 'Job', this.AwsProfile);
 		}
 		this.SaveState();
 	}
@@ -228,6 +246,7 @@ export class GlueTreeView {
 		this.AwsProfile = selectedAwsProfile;
 		this.SaveState();
 		this.SetFilterMessage();
+		this.treeDataProvider.Refresh();
 	}
 
 	async UpdateAwsEndPoint() {

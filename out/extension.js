@@ -32,6 +32,12 @@ function activate(context) {
     vscode.commands.registerCommand('GlueTreeView.ShowHiddenNodes', () => {
         treeView.ShowHiddenNodes();
     });
+    vscode.commands.registerCommand('GlueTreeView.ShowOnlyInThisProfile', (node) => {
+        treeView.ShowOnlyInThisProfile(node);
+    });
+    vscode.commands.registerCommand('GlueTreeView.ShowInAnyProfile', (node) => {
+        treeView.ShowInAnyProfile(node);
+    });
     vscode.commands.registerCommand('GlueTreeView.AddToFav', (node) => {
         treeView.AddToFav(node);
     });

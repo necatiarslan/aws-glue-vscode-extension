@@ -38,6 +38,8 @@
     "AWS Glue Job Filter",
     "AWS Glue Job Show Only Favorite",
     "AWS Glue Job Show Hidden Nodes",
+    "AWS Glue Job Show Only In This Profile",
+    "AWS Glue Job Show In Any Profile",
     "AWS Glue Job Add To Favorite",
     "AWS Glue Job Delete From Favorite",
     "AWS Glue Job Hide Node",
@@ -100,6 +102,16 @@
         "command": "GlueTreeView.ShowHiddenNodes",
         "title": "Show Hidden Nodes",
         "icon": "$(eye-closed)"
+      },
+      {
+        "command": "GlueTreeView.ShowOnlyInThisProfile",
+        "title": "Show Only In This Profile",
+        "icon": "$(account)"
+      },
+      {
+        "command": "GlueTreeView.ShowInAnyProfile",
+        "title": "Show In Any Profile",
+        "icon": "$(organization)"
       },
       {
         "command": "GlueTreeView.AddToFav",
@@ -313,6 +325,16 @@
         },
         {
           "command": "GlueTreeView.UnHideNode",
+          "when": "view == GlueTreeView && viewItem == Job",
+          "group": "Filter"
+        },
+        {
+          "command": "GlueTreeView.ShowOnlyInThisProfile",
+          "when": "view == GlueTreeView && viewItem == Job",
+          "group": "Filter"
+        },
+        {
+          "command": "GlueTreeView.ShowInAnyProfile",
           "when": "view == GlueTreeView && viewItem == Job",
           "group": "Filter"
         },

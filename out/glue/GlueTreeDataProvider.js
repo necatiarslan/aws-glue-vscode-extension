@@ -141,6 +141,11 @@ class GlueTreeDataProvider {
             for (let res of resourceList) {
                 if (GlueTreeView_1.GlueTreeView.Current.FilterString && !res.Name.includes(GlueTreeView_1.GlueTreeView.Current.FilterString))
                     continue;
+                // Apply profile filter
+                if (!GlueTreeView_1.GlueTreeView.Current.isShowHiddenNodes) {
+                    if (res.Profile && res.Profile !== GlueTreeView_1.GlueTreeView.Current.AwsProfile)
+                        continue;
+                }
                 let type = res.Type;
                 if (type !== GlueTreeItem_1.TreeItemType.Job) {
                     type = GlueTreeItem_1.TreeItemType.Job; // Migration: default to Job
@@ -159,9 +164,9 @@ class GlueTreeDataProvider {
             return items;
         }
     }
-    AddResource(region, name, type) {
+    AddResource(region, name, type, profile) {
         if (!GlueTreeView_1.GlueTreeView.Current.ResourceList.find(r => r.Region === region && r.Name === name && r.Type === type)) {
-            GlueTreeView_1.GlueTreeView.Current.ResourceList.push({ Region: region, Name: name, Type: type });
+            GlueTreeView_1.GlueTreeView.Current.ResourceList.push({ Region: region, Name: name, Type: type, Profile: profile || GlueTreeView_1.GlueTreeView.Current.AwsProfile });
             this.Refresh();
         }
     }

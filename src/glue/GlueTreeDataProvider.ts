@@ -145,6 +145,11 @@ export class GlueTreeDataProvider implements vscode.TreeDataProvider<GlueTreeIte
 			for (let res of resourceList) {
 				if (GlueTreeView.Current.FilterString && !res.Name.includes(GlueTreeView.Current.FilterString)) continue;
 				
+				// Apply profile filter
+				if (!GlueTreeView.Current.isShowHiddenNodes) {
+					if (res.Profile && res.Profile !== GlueTreeView.Current.AwsProfile) continue;
+				}
+				
 				let type = res.Type as TreeItemType;
 				if (type !== TreeItemType.Job) {
 					type = TreeItemType.Job; // Migration: default to Job
@@ -166,9 +171,9 @@ export class GlueTreeDataProvider implements vscode.TreeDataProvider<GlueTreeIte
 		}
 	}
 
-	AddResource(region: string, name: string, type: string) {
+	AddResource(region: string, name: string, type: string, profile?: string) {
 		if (!GlueTreeView.Current.ResourceList.find(r => r.Region === region && r.Name === name && r.Type === type)) {
-			GlueTreeView.Current.ResourceList.push({ Region: region, Name: name, Type: type });
+			GlueTreeView.Current.ResourceList.push({ Region: region, Name: name, Type: type, Profile: profile || GlueTreeView.Current.AwsProfile });
 			this.Refresh();
 		}
 	}

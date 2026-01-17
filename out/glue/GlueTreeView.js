@@ -128,6 +128,22 @@ class GlueTreeView {
         this.SaveState();
         this.SetFilterMessage();
     }
+    async ShowOnlyInThisProfile(node) {
+        const resource = this.ResourceList.find(r => r.Region === node.Region && r.Name === node.ResourceName);
+        if (resource) {
+            resource.Profile = this.AwsProfile;
+        }
+        this.treeDataProvider.Refresh();
+        this.SaveState();
+    }
+    async ShowInAnyProfile(node) {
+        const resource = this.ResourceList.find(r => r.Region === node.Region && r.Name === node.ResourceName);
+        if (resource) {
+            resource.Profile = undefined;
+        }
+        this.treeDataProvider.Refresh();
+        this.SaveState();
+    }
     GetBoolenSign(value) {
         return value ? "✓ " : "✗ ";
     }
@@ -187,7 +203,7 @@ class GlueTreeView {
             return;
         }
         for (var name of selectedResourceList) {
-            this.treeDataProvider.AddResource(selectedRegion, name, 'Job');
+            this.treeDataProvider.AddResource(selectedRegion, name, 'Job', this.AwsProfile);
         }
         this.SaveState();
     }
@@ -219,6 +235,7 @@ class GlueTreeView {
         this.AwsProfile = selectedAwsProfile;
         this.SaveState();
         this.SetFilterMessage();
+        this.treeDataProvider.Refresh();
     }
     async UpdateAwsEndPoint() {
         let awsEndPointUrl = await vscode.window.showInputBox({ placeHolder: 'Enter Aws End Point URL (Leave Empty To Return To Default)' });
