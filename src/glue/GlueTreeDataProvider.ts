@@ -160,6 +160,19 @@ export class GlueTreeDataProvider implements vscode.TreeDataProvider<GlueTreeIte
 				item.IsFav = res.IsFav || false;
 				item.IsHidden = res.IsHidden || false;
 				
+				// Set contextValue based on profile, favorite, and hidden states
+				let contextValue = "Job";
+				if (res.Profile) {
+					contextValue += "WithProfile";
+				}
+				if (item.IsFav) {
+					contextValue += "Fav";
+				}
+				if (item.IsHidden) {
+					contextValue += "Hidden";
+				}
+				item.contextValue = contextValue;
+				
 				// Apply favorite and hidden filters
 				if (GlueTreeView.Current.isShowOnlyFavorite && !item.IsFav) continue;
 				if (!GlueTreeView.Current.isShowHiddenNodes && item.IsHidden) continue;

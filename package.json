@@ -310,47 +310,47 @@
       "view/item/context": [
         {
           "command": "GlueTreeView.AddToFav",
-          "when": "view == GlueTreeView && viewItem == Job",
+          "when": "view == GlueTreeView && viewItem =~ /^Job(?!.*Fav).*$/",
           "group": "Filter"
         },
         {
           "command": "GlueTreeView.DeleteFromFav",
-          "when": "view == GlueTreeView && viewItem == Job",
+          "when": "view == GlueTreeView && viewItem =~ /^Job.*Fav.*$/",
           "group": "Filter"
         },
         {
           "command": "GlueTreeView.HideNode",
-          "when": "view == GlueTreeView && viewItem == Job",
+          "when": "view == GlueTreeView && viewItem =~ /^Job(?!.*Hidden).*$/",
           "group": "Filter"
         },
         {
           "command": "GlueTreeView.UnHideNode",
-          "when": "view == GlueTreeView && viewItem == Job",
+          "when": "view == GlueTreeView && viewItem =~ /^Job.*Hidden.*$/",
           "group": "Filter"
         },
         {
           "command": "GlueTreeView.ShowOnlyInThisProfile",
-          "when": "view == GlueTreeView && viewItem == Job",
+          "when": "view == GlueTreeView && viewItem =~ /^Job(?!.*WithProfile).*$/",
           "group": "Filter"
         },
         {
           "command": "GlueTreeView.ShowInAnyProfile",
-          "when": "view == GlueTreeView && viewItem == Job",
+          "when": "view == GlueTreeView && viewItem =~ /^Job.*WithProfile.*$/",
           "group": "Filter"
         },
         {
           "command": "GlueTreeView.RemoveGlueJob",
-          "when": "view == GlueTreeView && viewItem == Job",
+          "when": "view == GlueTreeView && viewItem =~ /^Job.*/",
           "group": "Glue"
         },
         {
           "command": "GlueTreeView.Goto",
-          "when": "view == GlueTreeView && viewItem == Job",
+          "when": "view == GlueTreeView && viewItem =~ /^Job.*/",
           "group": "Glue"
         },
         {
           "command": "GlueTreeView.RunJob",
-          "when": "view == GlueTreeView && viewItem == Job",
+          "when": "view == GlueTreeView && viewItem =~ /^Job.*/",
           "group": "inline"
         },
         {
