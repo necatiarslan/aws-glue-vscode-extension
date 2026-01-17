@@ -1,3 +1,7 @@
+# v1.0.2
+    -fixed issue where Aws Profile info was not displayed in some filter messages
+    -improved error handling for connection tests
+    
 # v1.0.1
     -log Aws AccountId, UserId and Arn on successful connection test
     -added Aws Profile info to filter message
