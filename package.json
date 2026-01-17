@@ -2,7 +2,7 @@
   "name": "aws-glue-vscode-extension",
   "displayName": "Aws Glue",
   "description": "Update, Trigger & Monitor your Aws Glue Jobs",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "publisher": "NecatiARSLAN",
   "repository": {
     "type": "git",
@@ -310,32 +310,32 @@
       "view/item/context": [
         {
           "command": "GlueTreeView.AddToFav",
-          "when": "view == GlueTreeView && viewItem =~ /^Job(?!.*Fav).*$/",
+          "when": "view == GlueTreeView && viewItem =~ /^Job(#(?!.*#Fav)).*$/",
           "group": "Filter"
         },
         {
           "command": "GlueTreeView.DeleteFromFav",
-          "when": "view == GlueTreeView && viewItem =~ /^Job.*Fav.*$/",
+          "when": "view == GlueTreeView && viewItem =~ /^Job.*#Fav/",
           "group": "Filter"
         },
         {
           "command": "GlueTreeView.HideNode",
-          "when": "view == GlueTreeView && viewItem =~ /^Job(?!.*Hidden).*$/",
+          "when": "view == GlueTreeView && viewItem =~ /^Job(?!.*#Hidden).*$/",
           "group": "Filter"
         },
         {
           "command": "GlueTreeView.UnHideNode",
-          "when": "view == GlueTreeView && viewItem =~ /^Job.*Hidden.*$/",
+          "when": "view == GlueTreeView && viewItem =~ /^Job.*#Hidden/",
           "group": "Filter"
         },
         {
           "command": "GlueTreeView.ShowOnlyInThisProfile",
-          "when": "view == GlueTreeView && viewItem =~ /^Job(?!.*WithProfile).*$/",
+          "when": "view == GlueTreeView && viewItem =~ /^Job(?!.*#WithProfile).*$/",
           "group": "Filter"
         },
         {
           "command": "GlueTreeView.ShowInAnyProfile",
-          "when": "view == GlueTreeView && viewItem =~ /^Job.*WithProfile.*$/",
+          "when": "view == GlueTreeView && viewItem =~ /^Job.*#WithProfile/",
           "group": "Filter"
         },
         {

@@ -157,13 +157,13 @@ class GlueTreeDataProvider {
                 // Set contextValue based on profile, favorite, and hidden states
                 let contextValue = "Job";
                 if (res.Profile) {
-                    contextValue += "WithProfile";
+                    contextValue += "#WithProfile";
                 }
                 if (item.IsFav) {
-                    contextValue += "Fav";
+                    contextValue += "#Fav";
                 }
                 if (item.IsHidden) {
-                    contextValue += "Hidden";
+                    contextValue += "#Hidden";
                 }
                 item.contextValue = contextValue;
                 // Apply favorite and hidden filters
